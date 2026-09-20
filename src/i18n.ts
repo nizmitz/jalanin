@@ -12,6 +12,7 @@ export type StringKey =
   | 'follow'
   | 'stopFollow'
   | 'alertEnter'
+  | 'gpsDenied'
   | 'offlineReady'
   | 'downloadMap'
   | 'downloading'
@@ -36,6 +37,7 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     follow: 'Ikuti posisi',
     stopFollow: 'Berhenti ikuti',
     alertEnter: 'Masuk jalur gage: {road}',
+    gpsDenied: 'Akses lokasi ditolak. Aktifkan GPS untuk mengikuti posisi.',
     offlineReady: 'Peta siap offline',
     downloadMap: 'Unduh peta Jakarta untuk offline',
     downloading: 'Mengunduh peta…',
@@ -59,6 +61,7 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     follow: 'Follow me',
     stopFollow: 'Stop following',
     alertEnter: 'Entering gage road: {road}',
+    gpsDenied: 'Location access denied. Enable GPS to follow your position.',
     offlineReady: 'Map ready offline',
     downloadMap: 'Download Jakarta map for offline use',
     downloading: 'Downloading map…',

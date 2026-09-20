@@ -14,6 +14,7 @@ const KEYS: StringKey[] = [
   'follow',
   'stopFollow',
   'alertEnter',
+  'gpsDenied',
   'offlineReady',
   'downloadMap',
   'downloading',

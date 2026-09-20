@@ -1,11 +1,10 @@
 import * as maplibregl from 'maplibre-gl';
-import type { FeatureCollection, MultiLineString } from 'geojson';
-import gageRaw from '../data/gage.geojson?raw';
+import { GAGE_ROADS } from './roads';
 import type { Verdict } from './gage';
 import type { Theme } from './theme';
 import type { GageProps } from './types';
 
-const gage = JSON.parse(gageRaw) as FeatureCollection<MultiLineString, GageProps>;
+const gage = GAGE_ROADS;
 
 export type RoadState = 'blocked' | 'blocked-later' | 'open';
 
