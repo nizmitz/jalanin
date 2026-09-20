@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { isGageActive, isWithinHours, jakartaTime, parityOfDay, verdict } from '../src/gage';
+import {
+  dayKind,
+  isGageActive,
+  isWithinHours,
+  jakartaTime,
+  parityOfDay,
+  verdict,
+} from '../src/gage';
 
 const none = new Set<string>();
 const wib = (iso: string) => new Date(`${iso}+07:00`);
@@ -68,5 +75,15 @@ describe('verdict', () => {
   });
   it('verdict independent of hour (day-level), activity is hour-level', () => {
     expect(verdict('odd', wib('2026-09-21T12:00:00'), none)).toBe('ok');
+  });
+});
+
+describe('dayKind', () => {
+  it('holiday beats weekday, weekend otherwise', () => {
+    expect(dayKind(jakartaTime(wib('2026-08-17T08:00:00')), new Set(['2026-08-17']))).toBe(
+      'holiday',
+    );
+    expect(dayKind(jakartaTime(wib('2026-08-17T08:00:00')), none)).toBe('weekday');
+    expect(dayKind(jakartaTime(wib('2026-09-20T08:00:00')), none)).toBe('weekend');
   });
 });

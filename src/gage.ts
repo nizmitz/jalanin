@@ -56,8 +56,15 @@ export function isoDate(t: JakartaTime): string {
   return `${String(t.year)}-${mm}-${dd}`;
 }
 
+export type DayKind = 'weekday' | 'weekend' | 'holiday';
+
+export function dayKind(t: JakartaTime, holidays: ReadonlySet<string>): DayKind {
+  if (holidays.has(isoDate(t))) return 'holiday';
+  return t.weekday >= 1 && t.weekday <= 5 ? 'weekday' : 'weekend';
+}
+
 export function isGageDay(t: JakartaTime, holidays: ReadonlySet<string>): boolean {
-  return t.weekday >= 1 && t.weekday <= 5 && !holidays.has(isoDate(t));
+  return dayKind(t, holidays) === 'weekday';
 }
 
 export function isGageActive(d: Date, holidays: ReadonlySet<string>): boolean {

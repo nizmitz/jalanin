@@ -1,32 +1,90 @@
 import './style.css';
-import { isGageActive, verdict } from './gage';
+import { dayKind, isGageActive, jakartaTime, verdict } from './gage';
 import { HOLIDAYS } from './holidays';
-import { addGageLayers, roadState } from './gage-layer';
-import { applyTheme, createMap } from './map';
-import { setTheme, systemTheme } from './theme';
+import { addGageLayers, roadState, setGageState } from './gage-layer';
+import { addAttribution, applyTheme, createMap } from './map';
+import { getLang, getParity, getTheme, setLang, setParity, setTheme } from './store';
+import { mountUi } from './ui';
 import type { Theme } from './theme';
+import type { DayKind, Parity } from './gage';
+
+const STATUS_POLL_MS = 30_000;
 
 const app = document.getElementById('app');
 if (!app) throw new Error('missing #app element');
 
-let theme: Theme = systemTheme();
-const map = createMap(app, theme);
+const mapEl = document.createElement('div');
+mapEl.className = 'map';
+const uiEl = document.createElement('div');
+app.append(mapEl, uiEl);
 
-function currentRoadState(): ReturnType<typeof roadState> {
-  // Parity is hardcoded to 'odd' until Task 8 adds the user-facing toggle.
+let theme: Theme = getTheme();
+let parity: Parity = getParity();
+let lang = getLang();
+
+document.documentElement.dataset.theme = theme;
+
+const map = createMap(mapEl, theme);
+addAttribution(map);
+
+function currentState(): {
+  state: ReturnType<typeof roadState>;
+  verdict: ReturnType<typeof verdict>;
+  active: boolean;
+  day: DayKind;
+} {
   const now = new Date();
-  return roadState(verdict('odd', now, HOLIDAYS), isGageActive(now, HOLIDAYS));
+  const v = verdict(parity, now, HOLIDAYS);
+  const active = isGageActive(now, HOLIDAYS);
+  const day = dayKind(jakartaTime(now), HOLIDAYS);
+  return { state: roadState(v, active), verdict: v, active, day };
 }
 
 // 'style.load' fires for the initial style and after every applyTheme().
 map.on('style.load', () => {
-  addGageLayers(map, currentRoadState(), theme);
+  addGageLayers(map, currentState().state, theme);
 });
 
-// Temporary: press 'd' to toggle light/dark theme (Task 8 replaces this with a UI button).
-window.addEventListener('keydown', (e) => {
-  if (e.key !== 'd') return;
-  theme = theme === 'dark' ? 'light' : 'dark';
-  setTheme(theme);
-  applyTheme(map, theme);
+let followOn = false;
+
+const ui = mountUi(uiEl, {
+  initial: { parity, theme, lang },
+  onParity(p) {
+    parity = p;
+    setParity(p);
+    const { state, verdict: v, active, day } = currentState();
+    setGageState(map, state);
+    ui.setStatus(v, active, day);
+    ui.setParity(p);
+  },
+  onFollow() {
+    // GPS wiring lands in Task 9; for now the button only reflects pressed state.
+    followOn = !followOn;
+    ui.setFollow(followOn);
+  },
+  onTheme() {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(theme);
+    document.documentElement.dataset.theme = theme;
+    applyTheme(map, theme);
+    ui.setTheme(theme);
+  },
+  onLang() {
+    lang = lang === 'id' ? 'en' : 'id';
+    setLang(lang);
+    ui.setLang(lang);
+    const { verdict: v, active, day } = currentState();
+    ui.setStatus(v, active, day);
+  },
 });
+
+{
+  const { verdict: v, active, day } = currentState();
+  ui.setStatus(v, active, day);
+}
+
+setInterval(() => {
+  const { state, verdict: v, active, day } = currentState();
+  setGageState(map, state);
+  ui.setStatus(v, active, day);
+}, STATUS_POLL_MS);

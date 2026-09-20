@@ -37,8 +37,13 @@ export function createMap(container: HTMLElement, theme: Theme): maplibregl.Map 
     style: buildStyle(theme),
     center: JAKARTA_CENTER,
     zoom: 11,
-    attributionControl: { compact: true },
+    attributionControl: false,
   });
+}
+
+// Attribution goes bottom-left so it never collides with the UI button stack.
+export function addAttribution(map: maplibregl.Map): void {
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 }
 
 export function applyTheme(map: maplibregl.Map, theme: Theme): void {
