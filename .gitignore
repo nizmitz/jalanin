@@ -1,0 +1,9 @@
+node_modules
+dist
+dev-dist
+public/jakarta.pmtiles
+public/basemap-assets
+data/raw
+.env
+*.log
+.DS_Store
