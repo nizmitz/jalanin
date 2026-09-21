@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { escapeHtml, roadState } from '../src/gage-layer';
+import { roadState } from '../src/gage-layer';
+import { escapeHtml } from '../src/html';
 
 describe('roadState', () => {
   it('avoid + active now -> blocked', () => {

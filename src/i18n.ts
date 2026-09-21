@@ -60,7 +60,14 @@ export type StringKey =
   | 'done'
   | 'exemptions'
   | 'exemptionsBody'
-  | 'installHint';
+  | 'installHint'
+  | 'more'
+  | 'switchToEn'
+  | 'switchToId'
+  | 'groupRules'
+  | 'groupTransit'
+  | 'groupRoad'
+  | 'groupHazard';
 
 export const STRINGS: Record<Lang, Record<StringKey, string>> = {
   id: {
@@ -124,6 +131,13 @@ export const STRINGS: Record<Lang, Record<StringKey, string>> = {
     exemptions: 'Pengecualian',
     exemptionsBody: 'Kendaraan tertentu bebas gage, misalnya ambulans dan mobil listrik.',
     installHint: 'Tambahkan ke layar utama untuk akses offline.',
+    more: 'Lainnya',
+    switchToEn: 'Switch to English',
+    switchToId: 'Ganti ke Bahasa Indonesia',
+    groupRules: 'Aturan',
+    groupTransit: 'Transportasi umum',
+    groupRoad: 'Jalan',
+    groupHazard: 'Bahaya',
   },
   en: {
     title: 'Jalanin',
@@ -186,6 +200,13 @@ export const STRINGS: Record<Lang, Record<StringKey, string>> = {
     exemptions: 'Exemptions',
     exemptionsBody: 'Some vehicles are exempt from gage, like ambulances and electric cars.',
     installHint: 'Add to your home screen for offline access.',
+    more: 'More',
+    switchToEn: 'Switch to English',
+    switchToId: 'Switch to Indonesian',
+    groupRules: 'Rules',
+    groupTransit: 'Transit',
+    groupRoad: 'Road',
+    groupHazard: 'Hazard',
   },
 };
 

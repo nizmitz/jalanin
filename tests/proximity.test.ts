@@ -97,4 +97,18 @@ describe('createProximity', () => {
     const { inside } = proximity.update(fixNear(LEAVE_M + 5), true, roads());
     expect(inside).toBeNull();
   });
+
+  it('reset() clears inside state without needing a LEAVE_M fix, so entered fires again', () => {
+    const proximity = createProximity();
+    const first = proximity.update(fixNear(ENTER_M - 5), true, roads());
+    expect(first.entered).not.toBeNull();
+
+    proximity.reset();
+
+    // Still well within ENTER_M — without the reset this would just hold `inside` and never
+    // fire `entered` a second time.
+    const { entered, inside } = proximity.update(fixNear(ENTER_M - 5), true, roads());
+    expect(entered).not.toBeNull();
+    expect(inside).not.toBeNull();
+  });
 });

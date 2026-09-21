@@ -71,6 +71,10 @@ export interface Proximity {
     blocked: boolean,
     roads: FeatureCollection<MultiLineString, GageProps>,
   ): ProximityResult;
+  // Clears the "inside" hysteresis state without waiting for a LEAVE_M fix. Needed whenever the
+  // gage layer itself is turned off: re-enabling it later must not immediately report `inside`
+  // for a road the user never actually re-entered.
+  reset(): void;
 }
 
 // Hysteresis + accuracy gate around nearestGageRoad: fires `entered` once when crossing inward
@@ -108,6 +112,9 @@ export function createProximity(): Proximity {
 
       inside = nearest;
       return { entered: null, inside };
+    },
+    reset() {
+      inside = null;
     },
   };
 }

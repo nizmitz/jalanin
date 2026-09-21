@@ -135,3 +135,98 @@ describe('mountUi initial state', () => {
     expect(document.documentElement.lang).toBe('en');
   });
 });
+
+describe('mountUi FAB set', () => {
+  it('shows exactly 3 fabs: follow, layers, more', () => {
+    mountUi(root, deps());
+    const fabs = [...root.querySelectorAll('.fab-stack > .fab')];
+    expect(fabs.map((b) => b.getAttribute('data-action'))).toEqual(['follow', 'layers', 'more']);
+  });
+
+  it('exposes a layersButton element with an aria-label', () => {
+    const ui = mountUi(root, deps());
+    expect(ui.layersButton).toBeInstanceOf(HTMLButtonElement);
+    expect(ui.layersButton.getAttribute('aria-label')).toBeTruthy();
+  });
+
+  it('theme, lang, share and about live inside the more sheet, share/about hidden for now', () => {
+    mountUi(root, deps());
+    const sheet = root.querySelector('.more-sheet');
+    expect(sheet?.querySelector('[data-action="theme"]')).not.toBeNull();
+    expect(sheet?.querySelector('[data-action="lang"]')).not.toBeNull();
+    expect(sheet?.querySelector('[data-action="share"]')?.hasAttribute('hidden')).toBe(true);
+    expect(sheet?.querySelector('[data-action="about"]')?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('openMore shows the more sheet as a labelled modal dialog and moves focus into it', () => {
+    const ui = mountUi(root, deps());
+    const sheet = root.querySelector('.more-sheet');
+    expect(sheet?.getAttribute('role')).toBe('dialog');
+    expect(sheet?.getAttribute('aria-modal')).toBe('true');
+    expect(sheet?.hasAttribute('hidden')).toBe(true);
+
+    ui.openMore();
+
+    expect(sheet?.hasAttribute('hidden')).toBe(false);
+    expect(sheet?.contains(document.activeElement)).toBe(true);
+  });
+
+  it('closeMore hides the sheet; Escape closes it and returns focus to the opener', () => {
+    const opener = document.createElement('button');
+    document.body.appendChild(opener);
+    opener.focus();
+
+    const ui = mountUi(root, deps());
+    const sheet = root.querySelector('.more-sheet');
+
+    ui.openMore();
+    expect(sheet?.hasAttribute('hidden')).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(sheet?.hasAttribute('hidden')).toBe(true);
+    expect(document.activeElement).toBe(opener);
+
+    ui.openMore();
+    ui.closeMore();
+    expect(sheet?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('Tab from the last focusable element in the more sheet cycles back to the first', () => {
+    const ui = mountUi(root, deps());
+    const sheet = root.querySelector<HTMLElement>('.more-sheet');
+    if (!sheet) throw new Error('more sheet not rendered');
+
+    ui.openMore();
+
+    // share/about are hidden for now, so close/theme/lang are the only focusable elements.
+    const focusable = [
+      ...sheet.querySelectorAll<HTMLElement>(
+        'button:not([disabled]):not([hidden]), [data-more-close]',
+      ),
+    ];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    expect(focusable.length).toBeGreaterThan(1);
+
+    last?.focus();
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(first);
+  });
+
+  it('inerts the opener while the more sheet is open and restores it on close', () => {
+    const opener = document.createElement('button');
+    document.body.appendChild(opener);
+    opener.focus();
+
+    const ui = mountUi(root, deps());
+    ui.openMore();
+    expect(opener.hasAttribute('inert')).toBe(true);
+    expect(opener.getAttribute('aria-hidden')).toBe('true');
+
+    ui.closeMore();
+    expect(opener.hasAttribute('inert')).toBe(false);
+    expect(opener.hasAttribute('aria-hidden')).toBe(false);
+  });
+});
