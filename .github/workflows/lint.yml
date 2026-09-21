@@ -1,0 +1,44 @@
+name: lint
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false, fetch-depth: 0 } # full history for the gitleaks git scan below
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with: { node-version: '22', cache: npm }
+      - name: Install lint binaries (hadolint, actionlint, gitleaks, zizmor, yamllint, pre-commit)
+        run: |
+          set -euo pipefail
+          curl -sSfLO https://github.com/hadolint/hadolint/releases/download/v2.14.0/hadolint-linux-x86_64
+          echo "6bf226944684f56c84dd014e8b979d27425c0148f61b3bd99bcc6f39e9dc5a47  hadolint-linux-x86_64" | sha256sum -c -
+          sudo install -m 0755 hadolint-linux-x86_64 /usr/local/bin/hadolint
+
+          curl -sSfLO https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz
+          echo "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757  actionlint_1.7.7_linux_amd64.tar.gz" | sha256sum -c -
+          tar -xzf actionlint_1.7.7_linux_amd64.tar.gz actionlint
+          sudo install -m 0755 actionlint /usr/local/bin/actionlint
+
+          curl -sSfLO https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks_8.30.1_linux_x64.tar.gz" | sha256sum -c -
+          sudo tar -xz -C /usr/local/bin -f gitleaks_8.30.1_linux_x64.tar.gz gitleaks
+
+          pip install --user zizmor==1.30.1 yamllint==1.38.0 pre-commit==4.6.2
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: npm ci
+      # The local no-commit-to-main guard is meaningless in CI (checkout of main is expected).
+      - run: pre-commit run --all-files
+        env: { SKIP: no-commit-to-branch }
+      - run: npm audit --audit-level=high
+      # Full-history scan (pre-commit's gitleaks hook only checks the working tree); catches a
+      # secret that was committed and later removed but still lives in history.
+      - run: gitleaks git --redact --config=.gitleaks.toml .
