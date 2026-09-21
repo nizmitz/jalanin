@@ -1,0 +1,29 @@
+{
+  "bbox": "-6.45,106.55,-6.05,107.05",
+  "items": [
+    {
+      "id": "mrt",
+      "kind": "route_master",
+      "query": "relation[\"type\"=\"route\"][\"route\"=\"subway\"][\"network\"~\"MRT Jakarta\"]",
+      "colour": "#0A4DA2"
+    },
+    {
+      "id": "lrt",
+      "kind": "route_master",
+      "query": "relation[\"type\"=\"route\"][\"route\"=\"light_rail\"][\"network\"~\"LRT\"]",
+      "colour": "#E4002B"
+    },
+    {
+      "id": "krl",
+      "kind": "route_master",
+      "query": "relation[\"type\"=\"route\"][\"route\"=\"train\"][\"network\"~\"KAI Commuter\"]",
+      "colour": "#D71920"
+    },
+    {
+      "id": "transjakarta",
+      "kind": "route_master",
+      "query": "relation[\"type\"=\"route\"][\"route\"=\"bus\"][\"network\"~\"Transjakarta\"][\"ref\"~\"^[0-9]{1,2}[A-Z]?$\"]",
+      "colour": "#1A6FB0"
+    }
+  ]
+}

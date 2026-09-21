@@ -220,8 +220,10 @@ function perpendicularDistance(p: Position, a: Position, b: Position): number {
   return Math.hypot(x - px, y - py);
 }
 
-// Classic recursive Douglas-Peucker over an open path.
-function douglasPeucker(points: Position[], toleranceDeg: number): Position[] {
+// Classic recursive Douglas-Peucker over an open path. Exported for reuse on
+// transit line geometry (Task A5), which is dense enough (KRL: ~17k raw
+// vertices) to blow the per-file size budget without simplification.
+export function douglasPeucker(points: Position[], toleranceDeg: number): Position[] {
   if (points.length < 3) return points;
   const first = points[0];
   const last = points[points.length - 1];

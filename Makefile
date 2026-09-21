@@ -1,4 +1,4 @@
-.PHONY: basemap assets pmtiles icons gage transit layers
+.PHONY: basemap assets pmtiles icons gage transit build-transit layers
 basemap: assets pmtiles
 assets:
 	bash scripts/fetch-basemap-assets.sh
@@ -9,5 +9,7 @@ icons:
 gage:
 	npx tsx scripts/fetch-osm.ts --source data/sources/gage.json && npx tsx scripts/build-gage.ts
 transit:
-	@echo "see Task A5"
+	npx tsx scripts/fetch-osm.ts --source data/sources/transit.json && npx tsx scripts/build-transit.ts
+build-transit:
+	npx tsx scripts/build-transit.ts
 layers: gage transit
