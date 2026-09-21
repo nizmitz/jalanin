@@ -1,9 +1,17 @@
 # Droplet runbook
 
 Prereqs: Cloudflare DNS record `maps` -> droplet IP (proxied), cache rule for hostname
-`maps.nizmitz.com` path `/jakarta.pmtiles` (cache eligible, edge TTL 1 month). The wildcard
-cert `*.nizmitz.com` at `/etc/letsencrypt/live/nizmitz.com/` already covers this host, so no
-new certbot issuance is needed.
+`maps.nizmitz.com` path `/jakarta.pmtiles` (cache eligible, edge TTL 1 month).
+
+Certificate: the ghost nginx container mounts `/opt/ghost/certbot/conf` as `/etc/letsencrypt`
+and holds one cert per host (no wildcard). Issue `maps.nizmitz.com` once with the existing
+certbot service (DNS-01, works before the A record exists):
+
+```sh
+ssh nizmitz-vpn 'cd /opt/ghost && docker compose run --rm certbot certonly \
+  --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  --dns-cloudflare-propagation-seconds 60 -d maps.nizmitz.com --non-interactive --agree-tos'
+```
 
 First deploy:
 
@@ -27,8 +35,8 @@ ssh nizmitz-vpn 'cd /opt/gage-jakarta && docker compose pull && docker compose u
 ssh nizmitz-vpn 'cd /opt/ghost && docker compose exec nginx nginx -t && docker compose exec nginx nginx -s reload'
 ```
 
-Renewal: existing cron `/opt/ghost/renew_certs.sh` handles every cert under live/ (wildcard
-renewal already covers `maps.nizmitz.com`, no per-host action needed).
+Renewal: existing cron `/opt/ghost/renew_certs.sh` runs `certbot renew` for every cert under
+live/, so `maps.nizmitz.com` renews with the rest.
 
 Health: `docker inspect --format '{{.State.Health.Status}}' gage-jakarta`,
 `curl -s https://maps.nizmitz.com/healthz`.
