@@ -1,0 +1,16 @@
+title = "gage-jakarta gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''node_modules/.*''',
+  '''dist/.*''',
+  '''dev-dist/.*''',
+  '''data/raw/.*''',
+  '''public/jakarta\.pmtiles''',
+  '''public/basemap-assets/.*''',
+  '''public/fonts/.*''',
+  '''public/icons/.*''',
+]

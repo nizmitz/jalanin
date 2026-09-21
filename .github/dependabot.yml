@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly, day: monday, time: '03:00', timezone: Asia/Jakarta }
+    cooldown: { default-days: 7 } # let a fresh release bake before it lands here
+    open-pull-requests-limit: 10
+    versioning-strategy: increase # bump the exact pins in package.json, no ^ added
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+      maplibre:
+        patterns: ['maplibre-gl', 'pmtiles', '@protomaps/*']
+      workbox:
+        patterns: ['workbox-*', 'vite-plugin-pwa']
+    labels: [deps, npm]
+    commit-message: { prefix: 'build(deps)' }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday, time: '03:00', timezone: Asia/Jakarta }
+    cooldown: { default-days: 7 } # let a fresh release bake before it lands here
+    groups:
+      actions: { patterns: ['*'] }
+    labels: [deps, ci]
+    commit-message: { prefix: 'ci(deps)' }
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: weekly, day: monday, time: '03:00', timezone: Asia/Jakarta }
+    cooldown: { default-days: 7 } # let a fresh release bake before it lands here
+    labels: [deps, docker]
+    commit-message: { prefix: 'build(deps)' }
