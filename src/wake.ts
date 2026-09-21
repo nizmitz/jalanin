@@ -16,6 +16,11 @@ export async function acquireWakeLock(): Promise<ReleaseWakeLock> {
   async function request(): Promise<void> {
     try {
       const acquired = await lock.request('screen');
+      if (released) {
+        // Follow mode stopped while this request was in flight: don't keep the lock.
+        void acquired.release();
+        return;
+      }
       sentinel = acquired;
       // The browser can release the lock on its own (tab backgrounded, screen off) without
       // going through our release() below — track that so onVisibilityChange knows to re-acquire.
