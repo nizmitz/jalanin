@@ -18,8 +18,8 @@ Rules and geometry are manually curated, not scraped live:
 - `src/gage.ts` `HOURS` -- gage hour windows (WIB); edit here if Pergub changes them.
 - `src/data/holidays-2026.json` -- yearly holiday list; add a new year's file and wire it up
   in `src/holidays.ts` before Jan 1.
-- `data/segments.json` / `data/gage.geojson` -- the 25 road geometries; regenerate via
-  `scripts/fetch-roads.ts` + `scripts/trim-roads.ts` if a road list changes.
+- `data/sources/gage.json` / `data/gage.geojson` -- the 25 road geometries; regenerate via
+  `make gage` (`scripts/fetch-osm.ts` + `scripts/build-gage.ts`) if a road list changes.
 
 ## Deploy
 

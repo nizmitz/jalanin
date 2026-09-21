@@ -1,17 +1,11 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Feature, FeatureCollection, MultiLineString, Position } from 'geojson';
 import type { GageProps } from '../src/types.ts';
-import { clipLine, type Bbox, type OverpassResponse } from './lib.ts';
+import { clipLine, type OverpassResponse, type SourceFile } from './lib.ts';
 
-interface Seg {
-  id: string;
-  name: string;
-  group: GageProps['group'];
-  note?: string;
-  clip?: Bbox;
-}
-
-const segs = JSON.parse(readFileSync('data/segments.json', 'utf8')) as Seg[];
+const RAW_DIR = 'data/raw/gage';
+const source = JSON.parse(readFileSync('data/sources/gage.json', 'utf8')) as SourceFile;
 const r6 = (n: number): number => Math.round(n * 1e6) / 1e6;
 
 function extent(lines: Position[][]): {
@@ -37,8 +31,12 @@ function extent(lines: Position[][]): {
 
 const CLIPPED_IDS = new Set(['fatmawati', 's-parman', 'a-yani', 'salemba-raya']);
 
-const features: Feature<MultiLineString, GageProps>[] = segs.map((s) => {
-  const raw = JSON.parse(readFileSync(`data/raw/${s.id}.json`, 'utf8')) as OverpassResponse;
+let latestMtimeMs = 0;
+const features: Feature<MultiLineString, GageProps>[] = source.items.map((s) => {
+  const rawPath = join(RAW_DIR, `${s.id}.json`);
+  const mtimeMs = statSync(rawPath).mtimeMs;
+  if (mtimeMs > latestMtimeMs) latestMtimeMs = mtimeMs;
+  const raw = JSON.parse(readFileSync(rawPath, 'utf8')) as OverpassResponse;
   const rawLines: Position[][] = raw.elements.map((w) =>
     w.geometry.map((p) => [r6(p.lon), r6(p.lat)] as Position),
   );
@@ -61,12 +59,26 @@ const features: Feature<MultiLineString, GageProps>[] = segs.map((s) => {
   const properties: GageProps = {
     id: s.id,
     name: s.name,
-    group: s.group,
+    group: s.group as GageProps['group'],
     ...(s.note ? { note: s.note } : {}),
   };
   return { type: 'Feature', properties, geometry: { type: 'MultiLineString', coordinates: lines } };
 });
 
-const fc: FeatureCollection<MultiLineString, GageProps> = { type: 'FeatureCollection', features };
+const dataAsOf =
+  latestMtimeMs > 0
+    ? new Date(latestMtimeMs).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+
+const fc: FeatureCollection<MultiLineString, GageProps> & {
+  properties: { data_as_of: string; source: string[] };
+} = {
+  type: 'FeatureCollection',
+  features,
+  properties: {
+    data_as_of: dataAsOf,
+    source: ['https://www.openstreetmap.org/copyright'],
+  },
+};
 writeFileSync('data/gage.geojson', JSON.stringify(fc));
-console.log(`wrote ${String(features.length)} roads`);
+console.log(`wrote ${String(features.length)} roads, data_as_of=${dataAsOf}`);

@@ -23,9 +23,9 @@ Other scripts: `npm run build`, `npm run preview`, `npm run lint`, `npm run type
 
 The gage rules are not scraped live -- they are manually curated and versioned in the repo:
 
-- **Roads** (`data/segments.json`, `data/gage.geojson`): if the official 25-road list
-  changes, edit `data/segments.json` then re-run `scripts/fetch-roads.ts` and
-  `scripts/trim-roads.ts` to regenerate `data/gage.geojson`.
+- **Roads** (`data/sources/gage.json`, `data/gage.geojson`): if the official 25-road list
+  changes, edit `data/sources/gage.json` then run `make gage` (`scripts/fetch-osm.ts` +
+  `scripts/build-gage.ts`) to regenerate `data/gage.geojson`.
 - **Hours** (`src/gage.ts`, `HOURS`): edit directly if the gage time windows change.
 - **Holidays** (`src/data/holidays-2026.json`): add next year's holiday list before
   January 1 and wire it into `src/holidays.ts`.

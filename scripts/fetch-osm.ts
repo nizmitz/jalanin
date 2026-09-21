@@ -1,14 +1,6 @@
+import { basename, join } from 'node:path';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { buildQuery, type OverpassResponse } from './lib.ts';
-
-interface Seg {
-  id: string;
-  name: string;
-  group: string;
-  osm: string;
-  note?: string;
-  clip?: [number, number, number, number];
-}
+import { buildQl, parseArgs, type OverpassResponse, type SourceFile } from './lib.ts';
 
 const ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
@@ -19,11 +11,7 @@ const ENDPOINTS = [
 // probe with curl returned 406 only because curl (and Node's default fetch)
 // sends no User-Agent, which Overpass rejects. Adding an explicit
 // User-Agent header fixed it, so no fallback area filter was needed.
-
-const UA = 'jalanin-fetch-roads/1.0 (+https://github.com/nizmitz/jalanin)';
-
-const segs = JSON.parse(readFileSync('data/segments.json', 'utf8')) as Seg[];
-mkdirSync('data/raw', { recursive: true });
+const UA = 'jalanin-fetch-osm/1.0 (+https://github.com/nizmitz/jalanin)';
 
 async function fetchOverpass(query: string): Promise<OverpassResponse> {
   let lastErr: unknown;
@@ -53,19 +41,26 @@ async function fetchOverpass(query: string): Promise<OverpassResponse> {
   throw lastErr instanceof Error ? lastErr : new Error('overpass fetch failed');
 }
 
-// Optional CLI args restrict the run to those segment ids, e.g.
-// `npx tsx scripts/fetch-roads.ts fatmawati a-yani`.
-const only = new Set(process.argv.slice(2));
-
 async function main(): Promise<void> {
-  for (const s of segs) {
-    if (only.size > 0 && !only.has(s.id)) continue;
-    const query = buildQuery(s.osm);
+  const { source: sourcePath, only, out } = parseArgs(process.argv.slice(2));
+  const source = JSON.parse(readFileSync(sourcePath, 'utf8')) as SourceFile;
+  const sourceName = basename(sourcePath).replace(/\.json$/, '');
+  const outDir = out ?? join('data/raw', sourceName);
+  mkdirSync(outDir, { recursive: true });
+
+  for (const item of source.items) {
+    if (only && only.size > 0 && !only.has(item.id)) continue;
+    const query = buildQl(item, source);
     const data = await fetchOverpass(query);
-    writeFileSync(`data/raw/${s.id}.json`, JSON.stringify(data));
-    console.log(s.id, `ways=${String(data.elements.length)}`);
+    writeFileSync(join(outDir, `${item.id}.json`), JSON.stringify(data));
+    console.log(item.id, `elements=${String(data.elements.length)}`);
     await new Promise((res) => setTimeout(res, 1500)); // be polite to Overpass
   }
 }
 
-await main();
+try {
+  await main();
+} catch (e) {
+  console.error(e instanceof Error ? e.message : String(e));
+  process.exit(1);
+}
