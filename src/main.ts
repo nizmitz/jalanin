@@ -1,10 +1,12 @@
 import './style.css';
+import { registerSW } from 'virtual:pwa-register';
 import { dayKind, isGageActive, jakartaTime, verdict } from './gage';
 import { HOLIDAYS } from './holidays';
 import { addGageLayers, roadState, setGageState } from './gage-layer';
 import { addUserLayers, bearingForFollow, startCompass, startWatch, updateUser } from './geo';
 import { t } from './i18n';
 import { addAttribution, applyTheme, createMap } from './map';
+import { basemapCached, offlineSupported, prefetchBasemap, storageEstimate } from './offline';
 import { createProximity } from './proximity';
 import { GAGE_ROADS } from './roads';
 import { getLang, getParity, getTheme, setLang, setParity, setTheme } from './store';
@@ -16,6 +18,9 @@ import type { DayKind, Parity } from './gage';
 import type { ReleaseWakeLock } from './wake';
 
 const STATUS_POLL_MS = 30_000;
+const OFFLINE_TOAST_MS = 3000;
+// Never offer the ~80 MB basemap download if it would leave less than this much free.
+const MIN_FREE_STORAGE_BYTES = 200 * 1024 * 1024;
 
 const app = document.getElementById('app');
 if (!app) throw new Error('missing #app element');
@@ -189,3 +194,75 @@ setInterval(() => {
   setGageState(map, state);
   ui.setStatus(v, active, day);
 }, STATUS_POLL_MS);
+
+registerSW({
+  onOfflineReady() {
+    // Only claim the map is offline-ready if the basemap has actually been prefetched — the
+    // precached shell alone (index.html/js/css/icons) is a much weaker guarantee.
+    void basemapCached().then((cached) => {
+      ui.showToast(cached ? t('offlineReady', lang) : t('shellReady', lang));
+    });
+  },
+});
+
+function makeDownloadButton(onClick: () => void): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'offline-banner__btn';
+  btn.textContent = t('downloadMap', lang);
+  btn.addEventListener('click', () => {
+    // Double-click guard: disable immediately so a second click can't start a second
+    // concurrent prefetch before the first re-render removes this button from the banner.
+    btn.disabled = true;
+    onClick();
+  });
+  return btn;
+}
+
+function renderDownloadPrompt(banner: HTMLElement): void {
+  banner.replaceChildren(makeDownloadButton(() => void runDownload(banner)));
+}
+
+async function runDownload(banner: HTMLElement): Promise<void> {
+  const progress = document.createElement('span');
+  progress.textContent = t('downloading', lang);
+  banner.replaceChildren(progress);
+  try {
+    await prefetchBasemap((pct) => {
+      progress.textContent = `${t('downloading', lang)} ${String(pct)}%`;
+    });
+    progress.textContent = t('mapReady', lang);
+    setTimeout(() => {
+      banner.hidden = true;
+      banner.replaceChildren();
+    }, OFFLINE_TOAST_MS);
+  } catch {
+    // Keep the failure text visible alongside the retry button, rather than a fresh render
+    // that wipes it: the user should see *why* there's a button again.
+    progress.textContent = t('downloadFailed', lang);
+    banner.append(makeDownloadButton(() => void runDownload(banner)));
+  }
+}
+
+// First-launch offline banner: offered once (until the basemap is cached), and only when there
+// is enough free storage headroom for it — see Review Focus item 5 / Task 11.
+void (async function setupOfflineBanner(): Promise<void> {
+  const banner = ui.offlineBanner;
+  try {
+    if (!offlineSupported()) return;
+    if (await basemapCached()) return;
+
+    const { usage, quota } = await storageEstimate();
+    if (quota > 0 && quota - usage < MIN_FREE_STORAGE_BYTES) {
+      banner.textContent = t('storageLow', lang);
+      banner.hidden = false;
+      return;
+    }
+
+    renderDownloadPrompt(banner);
+    banner.hidden = false;
+  } catch {
+    banner.textContent = t('downloadFailed', lang);
+    banner.hidden = false;
+  }
+})();

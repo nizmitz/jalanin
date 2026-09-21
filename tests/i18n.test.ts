@@ -1,28 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { t } from '../src/i18n';
+import { STRINGS, t } from '../src/i18n';
 import type { StringKey } from '../src/i18n';
 
-const KEYS: StringKey[] = [
-  'title',
-  'odd',
-  'even',
-  'active',
-  'inactive',
-  'holiday',
-  'weekend',
-  'hours',
-  'follow',
-  'stopFollow',
-  'alertEnter',
-  'gpsDenied',
-  'offlineReady',
-  'downloadMap',
-  'downloading',
-  'mapReady',
-  'dataAsOf',
-  'statusOk',
-  'statusAvoid',
-];
+// Derived from the Indonesian dictionary rather than a hand-written list, so a key added to
+// STRINGS.id is automatically exercised here without anyone remembering to update this file.
+const KEYS = Object.keys(STRINGS.id) as StringKey[];
 
 describe('t', () => {
   for (const key of KEYS) {
@@ -33,6 +15,10 @@ describe('t', () => {
       expect(t(key, 'en')).toBeTruthy();
     });
   }
+
+  it('en defines exactly the same key set as id', () => {
+    expect(Object.keys(STRINGS.en).sort()).toEqual(Object.keys(STRINGS.id).sort());
+  });
 
   it('alertEnter carries a {road} placeholder in both languages', () => {
     expect(t('alertEnter', 'id')).toContain('{road}');

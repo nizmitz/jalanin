@@ -221,12 +221,33 @@ button {
   right: 12px;
   top: calc(env(safe-area-inset-top) + 68px);
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--ink);
   font-size: 14px;
+}
+
+/* `display: flex` above wins over the `hidden` attribute's UA style unless restated here. */
+.offline-banner[hidden] {
+  display: none;
+}
+
+.offline-banner__btn {
+  flex: none;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--amber);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .alert {
@@ -245,6 +266,27 @@ button {
   font-size: 16px;
   text-align: center;
   box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 68px);
+  transform: translateX(-50%);
+  z-index: 2;
+  max-width: calc(100% - 96px);
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+}
+
+.toast[hidden] {
+  display: none;
 }
 
 .footer {

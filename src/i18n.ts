@@ -22,9 +22,12 @@ export type StringKey =
   | 'statusAvoid'
   | 'themeToggle'
   | 'activeOk'
-  | 'activeAvoid';
+  | 'activeAvoid'
+  | 'storageLow'
+  | 'downloadFailed'
+  | 'shellReady';
 
-const STRINGS: Record<Lang, Record<StringKey, string>> = {
+export const STRINGS: Record<Lang, Record<StringKey, string>> = {
   id: {
     title: 'Gage Jakarta',
     odd: 'Ganjil',
@@ -48,6 +51,9 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     themeToggle: 'Ganti tema',
     activeOk: 'Gage aktif · boleh lewat',
     activeAvoid: 'Gage aktif · hindari',
+    storageLow: 'Ruang penyimpanan tidak cukup untuk peta offline',
+    downloadFailed: 'Unduh peta gagal. Coba lagi.',
+    shellReady: 'Aplikasi siap offline',
   },
   en: {
     title: 'Gage Jakarta',
@@ -72,6 +78,9 @@ const STRINGS: Record<Lang, Record<StringKey, string>> = {
     themeToggle: 'Switch theme',
     activeOk: 'Gage active · you can pass',
     activeAvoid: 'Gage active · avoid',
+    storageLow: 'Not enough storage for the offline map',
+    downloadFailed: 'Map download failed. Try again.',
+    shellReady: 'App ready offline',
   },
 };
 

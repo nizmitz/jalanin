@@ -84,6 +84,32 @@ describe('mountUi', () => {
     expect(followBtn?.getAttribute('aria-pressed')).toBe('false');
   });
 
+  it('showToast shows text and auto-clears after the given duration', () => {
+    vi.useFakeTimers();
+    const ui = mountUi(root, deps());
+    const toast = root.querySelector('[data-toast]');
+    ui.showToast('Peta siap offline', 3000);
+    expect(toast?.textContent).toBe('Peta siap offline');
+    expect(toast?.hasAttribute('hidden')).toBe(false);
+    vi.advanceTimersByTime(2999);
+    expect(toast?.hasAttribute('hidden')).toBe(false);
+    vi.advanceTimersByTime(1);
+    expect(toast?.hasAttribute('hidden')).toBe(true);
+    vi.useRealTimers();
+  });
+
+  it('showToast does not clear an unrelated alert set via showAlert', () => {
+    vi.useFakeTimers();
+    const ui = mountUi(root, deps());
+    ui.showToast('Peta siap offline', 1000);
+    ui.showAlert('Masuk Sudirman');
+    vi.advanceTimersByTime(1000);
+    const alert = root.querySelector('[data-alert]');
+    expect(alert?.hasAttribute('hidden')).toBe(false);
+    expect(alert?.textContent).toBe('Masuk Sudirman');
+    vi.useRealTimers();
+  });
+
   it('setLang swaps visible copy', () => {
     const ui = mountUi(root, deps());
     ui.setLang('en');

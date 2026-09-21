@@ -15,6 +15,9 @@ export interface Ui {
   setStatus: (v: Verdict, active: boolean, day: DayKind) => void;
   setFollow: (on: boolean) => void;
   showAlert: (text: string | null) => void;
+  // Transient status toast (e.g. "map ready offline"). Auto-clears on its own timer, independent
+  // of showAlert — a proximity alert arriving mid-toast must not be wiped by the toast's timeout.
+  showToast: (text: string, ms?: number) => void;
   setLang: (lang: Lang) => void;
   setParity: (p: Parity) => void;
   // Swaps the theme button's icon to match the active theme (sun in dark mode, moon in light).
@@ -71,6 +74,7 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
       <button type="button" class="fab fab--text" data-action="lang">ID</button>
     </div>
     <div class="offline-banner" data-offline-banner hidden></div>
+    <div class="toast" data-toast hidden></div>
     <div class="alert" data-alert hidden></div>
     <div class="footer" data-footer></div>
   `;
@@ -82,7 +86,9 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
   const themeBtn = root.querySelector<HTMLButtonElement>('[data-action="theme"]');
   const langBtn = root.querySelector<HTMLButtonElement>('[data-action="lang"]');
   const alertEl = root.querySelector<HTMLDivElement>('[data-alert]');
+  const toastEl = root.querySelector<HTMLDivElement>('[data-toast]');
   const footerEl = root.querySelector<HTMLDivElement>('[data-footer]');
+  let toastTimer: ReturnType<typeof setTimeout> | null = null;
   const offlineBannerEl = root.querySelector<HTMLDivElement>('[data-offline-banner]');
   if (!offlineBannerEl) throw new Error('missing offline banner slot');
 
@@ -145,6 +151,17 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
       }
       alertEl.textContent = text;
       alertEl.removeAttribute('hidden');
+    },
+    showToast(text, ms = 3000) {
+      if (!toastEl) return;
+      if (toastTimer !== null) clearTimeout(toastTimer);
+      toastEl.textContent = text;
+      toastEl.removeAttribute('hidden');
+      toastTimer = setTimeout(() => {
+        toastEl.setAttribute('hidden', '');
+        toastEl.textContent = '';
+        toastTimer = null;
+      }, ms);
     },
     setLang(next) {
       lang = next;
