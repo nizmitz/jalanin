@@ -1,0 +1,15 @@
+node_modules
+dist
+dev-dist
+.git
+data/raw
+*.md
+tests
+.github
+.env*
+*.pem
+*.key
+.pre-commit-config.yaml
+scripts/
+deploy/README.md
+deploy/docker-compose.yml

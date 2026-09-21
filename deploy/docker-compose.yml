@@ -1,0 +1,19 @@
+# /opt/gage-jakarta/docker-compose.yml on the droplet.
+# Joins the existing `ghost_default` network so the ghost nginx container can proxy to `gage-jakarta:8080`.
+services:
+  gage-jakarta:
+    image: ghcr.io/nizmitz/gage-jakarta:latest
+    container_name: gage-jakarta
+    restart: unless-stopped
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    tmpfs: [/tmp:size=8m, /var/cache/nginx:size=16m, /var/run:size=1m]
+    mem_limit: 32m
+    memswap_limit: 32m
+    cpus: 0.5
+    pids_limit: 32
+    logging: { driver: json-file, options: { max-size: '5m', max-file: '3' } }
+    networks: [ghost_default]
+networks:
+  ghost_default: { external: true }

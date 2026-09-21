@@ -1,0 +1,96 @@
+# Install: pre-commit install
+# All hooks run against locally-installed binaries (language: system) -- no per-repo network
+# env builds, so this works offline. brew install hadolint actionlint gitleaks shellcheck
+# yamllint pre-commit; pipx install zizmor.
+default_install_hook_types: [pre-commit, commit-msg]
+repos:
+  - repo: local
+    hooks:
+      - id: check-added-large-files
+        name: check for added large files
+        entry: python3 scripts/check-large-files.py
+        language: system
+      - id: check-json
+        name: check json
+        entry: python3 scripts/check-json.py
+        language: system
+        types: [json]
+      - id: detect-private-key
+        name: detect private key
+        entry: python3 scripts/check-private-key.py
+        language: system
+        exclude: ^scripts/check-private-key\.py$
+      - id: end-of-file-fixer
+        name: fix end of files
+        entry: python3 scripts/fix-eof.py
+        language: system
+        types: [text]
+      - id: no-commit-to-branch
+        name: no commit to main
+        entry: bash -c 'test "$(git rev-parse --abbrev-ref HEAD)" != main'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: gitleaks
+        name: gitleaks (system binary)
+        entry: gitleaks detect --no-git --redact -v --source=. --config=.gitleaks.toml
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: prettier
+        name: prettier --check
+        entry: npx --no-install prettier --check .
+        language: system
+        pass_filenames: false
+      - id: eslint
+        name: eslint
+        entry: npx --no-install eslint .
+        language: system
+        pass_filenames: false
+      - id: tsc
+        name: typecheck
+        entry: npm run typecheck
+        language: system
+        pass_filenames: false
+        files: ^src/|^tests/
+      - id: vitest
+        name: vitest run
+        entry: npx --no-install vitest run
+        language: system
+        pass_filenames: false
+      - id: yamllint
+        name: yamllint
+        entry: yamllint -c .yamllint.yaml
+        language: system
+        types: [yaml]
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        types: [shell]
+      - id: actionlint
+        name: actionlint
+        entry: actionlint
+        language: system
+        files: ^\.github/workflows/.*\.ya?ml$
+        pass_filenames: false
+      - id: hadolint
+        name: hadolint
+        entry: hadolint
+        language: system
+        files: Dockerfile$
+      - id: zizmor
+        name: zizmor
+        entry: zizmor --config=zizmor.yml --min-severity=medium .github
+        language: system
+        files: ^\.github/(workflows|actions)/.*\.ya?ml$
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: commit-msg-format
+        name: conventional commit subject
+        entry: >-
+          bash -c 'head -1 "$1" | grep -Eq
+          "^(feat|fix|chore|docs|refactor|test|ci|build|perf)(\([a-z0-9-]+\))?!?: .{1,50}$"' --
+        language: system
+        stages: [commit-msg]
