@@ -1,4 +1,4 @@
-# gage-jakarta
+# Jalanin
 
 A mobile-first, offline-capable map of Jakarta's 25 "ganjil-genap" (odd-even) roads.
 Shows whether each road is currently restricted, follows your GPS with heading-up
@@ -36,5 +36,5 @@ After any data change, bump the "data as of" date shown in the UI footer, run
 ## Deploy
 
 See [`deploy/README.md`](deploy/README.md) for the droplet runbook. CI builds and
-publishes the container image to `ghcr.io/nizmitz/gage-jakarta`; deploying a new
+publishes the container image to `ghcr.io/nizmitz/jalanin`; deploying a new
 version on the droplet is a manual `docker compose pull && docker compose up -d`.

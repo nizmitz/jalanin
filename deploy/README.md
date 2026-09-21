@@ -16,8 +16,8 @@ ssh nizmitz-vpn 'cd /opt/ghost && docker compose run --rm certbot certonly \
 First deploy:
 
 ```sh
-ssh nizmitz-vpn 'mkdir -p /opt/gage-jakarta'
-scp deploy/docker-compose.yml nizmitz-vpn:/opt/gage-jakarta/
+ssh nizmitz-vpn 'mkdir -p /opt/jalanin'
+scp deploy/docker-compose.yml nizmitz-vpn:/opt/jalanin/
 scp deploy/nginx/maps.conf nizmitz-vpn:/opt/ghost/nginx/conf/
 # add maps.nizmitz.com to the port-80 redirect server_name list in /opt/ghost/nginx/conf/default.conf
 
@@ -27,20 +27,20 @@ ssh nizmitz-vpn 'curl -sSfL -o /tmp/cosign https://github.com/sigstore/cosign/re
 
 # Verify the image is signed by this repo's CI (keyless, GitHub OIDC) before running it.
 ssh nizmitz-vpn 'cosign verify \
-  --certificate-identity-regexp "^https://github.com/nizmitz/gage-jakarta/" \
+  --certificate-identity-regexp "^https://github.com/nizmitz/jalanin/" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/nizmitz/gage-jakarta:latest'
+  ghcr.io/nizmitz/jalanin:latest'
 
-ssh nizmitz-vpn 'cd /opt/gage-jakarta && docker compose pull && docker compose up -d'
+ssh nizmitz-vpn 'cd /opt/jalanin && docker compose pull && docker compose up -d'
 ssh nizmitz-vpn 'cd /opt/ghost && docker compose exec nginx nginx -t && docker compose exec nginx nginx -s reload'
 ```
 
 Renewal: existing cron `/opt/ghost/renew_certs.sh` runs `certbot renew` for every cert under
 live/, so `maps.nizmitz.com` renews with the rest.
 
-Health: `docker inspect --format '{{.State.Health.Status}}' gage-jakarta`,
+Health: `docker inspect --format '{{.State.Health.Status}}' jalanin`,
 `curl -s https://maps.nizmitz.com/healthz`.
-Logs: `docker logs --tail 100 gage-jakarta`. RAM: `docker stats --no-stream gage-jakarta` (limit 32m).
+Logs: `docker logs --tail 100 jalanin`. RAM: `docker stats --no-stream jalanin` (limit 32m).
 
 Smoke test after deploy/reload:
 
@@ -50,16 +50,16 @@ curl -sI -H 'Range: bytes=0-15' https://maps.nizmitz.com/jakarta.pmtiles   # exp
 ```
 
 If RAM is tight (`free -m` available < 200MB): stop a lower-priority ghost service before
-starting gage-jakarta; this container is capped at 32 MiB so it should not be the cause.
+starting jalanin; this container is capped at 32 MiB so it should not be the cause.
 
 Updating the running image (new tag pushed by CI):
 
 ```sh
 ssh nizmitz-vpn 'cosign verify \
-  --certificate-identity-regexp "^https://github.com/nizmitz/gage-jakarta/" \
+  --certificate-identity-regexp "^https://github.com/nizmitz/jalanin/" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/nizmitz/gage-jakarta:latest'
-ssh nizmitz-vpn 'cd /opt/gage-jakarta && docker compose pull && docker compose up -d'
+  ghcr.io/nizmitz/jalanin:latest'
+ssh nizmitz-vpn 'cd /opt/jalanin && docker compose pull && docker compose up -d'
 ```
 
 If tile/basemap requests fail behind Cloudflare, check Bot Fight Mode is disabled for the

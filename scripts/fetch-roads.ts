@@ -20,7 +20,7 @@ const ENDPOINTS = [
 // sends no User-Agent, which Overpass rejects. Adding an explicit
 // User-Agent header fixed it, so no fallback area filter was needed.
 
-const UA = 'gage-jakarta-fetch-roads/1.0 (+https://github.com/nizmitz/gage-jakarta)';
+const UA = 'jalanin-fetch-roads/1.0 (+https://github.com/nizmitz/jalanin)';
 
 const segs = JSON.parse(readFileSync('data/segments.json', 'utf8')) as Seg[];
 mkdirSync('data/raw', { recursive: true });

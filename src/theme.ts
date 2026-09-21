@@ -1,15 +1,21 @@
 export type Theme = 'light' | 'dark';
 
-export const THEME_KEY = 'gage.theme';
+export const THEME_KEY = 'jalanin.theme';
+const LEGACY_THEME_KEY = 'gage.theme';
 
 function isTheme(value: string | null): value is Theme {
   return value === 'light' || value === 'dark';
 }
 
-// Storage can throw (private mode, blocked site data); never let it block startup.
+// Storage can throw (private mode, blocked site data); never let it block startup. Falls back to
+// the pre-rename key so users who set a theme before the app was renamed keep their choice.
 function readStored(): string | null {
   try {
-    return localStorage.getItem(THEME_KEY);
+    const current = localStorage.getItem(THEME_KEY);
+    if (current !== null) return current;
+    const legacy = localStorage.getItem(LEGACY_THEME_KEY);
+    if (legacy !== null) localStorage.setItem(THEME_KEY, legacy); // copy forward once
+    return legacy;
   } catch {
     return null;
   }

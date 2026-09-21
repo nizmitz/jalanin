@@ -22,8 +22,9 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5_000_000,
       },
       manifest: {
-        name: 'Gage Jakarta',
-        short_name: 'Gage',
+        name: 'Jalanin',
+        short_name: 'Jalanin',
+        description: 'Gage, tol, banjir, MRT — sekali lihat.',
         lang: 'id',
         display: 'standalone',
         start_url: '/',

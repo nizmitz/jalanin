@@ -1,4 +1,4 @@
-# gage-jakarta
+# Jalanin
 
 Mobile-first static PWA (Vite + TS, MapLibre GL JS + PMTiles) showing Jakarta's
 25 ganjil-genap roads. No backend; deployed as a static bundle behind nginx.
@@ -24,4 +24,4 @@ Rules and geometry are manually curated, not scraped live:
 ## Deploy
 
 See `deploy/README.md` for the droplet runbook (`maps.nizmitz.com`, ghost nginx reverse proxy).
-CI publishes `ghcr.io/nizmitz/gage-jakarta`; deploy is a manual `docker compose pull && up -d`.
+CI publishes `ghcr.io/nizmitz/jalanin`; deploy is a manual `docker compose pull && up -d`.

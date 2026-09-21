@@ -1,4 +1,4 @@
-title = "gage-jakarta gitleaks config"
+title = "jalanin gitleaks config"
 
 [extend]
 useDefault = true
