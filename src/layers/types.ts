@@ -5,9 +5,13 @@ import type { Theme } from '../theme';
 
 export type LayerGroup = 'rules' | 'transit' | 'road' | 'hazard';
 
+// Either `labelKey` (a translated string) or a literal `label` (for text that isn't a fixed
+// StringKey, e.g. a line's own `${ref} ${name}` built from data). Exactly one is expected to be
+// set; `label` wins if both are.
 export interface LegendEntry {
   colour: string;
-  labelKey: StringKey;
+  labelKey?: StringKey;
+  label?: string;
   dashed?: boolean;
 }
 
@@ -26,8 +30,10 @@ export interface LayerDef {
   data: FeatureCollection | (() => Promise<FeatureCollection>);
   // Style layer ids must be prefixed `${id}-`; the manager validates the prefix at apply time.
   layers: (theme: Theme) => LayerStyleSpec[];
-  // Symbol layers that should sit above basemap labels instead of below them.
-  aboveLabels?: boolean;
+  // Symbol layers that should sit above basemap labels instead of below them. A plain boolean
+  // applies to every style layer the def emits; a predicate lets a def put some of its layers
+  // (e.g. station labels) above while keeping others (lines, station dots) below.
+  aboveLabels?: boolean | ((layerId: string) => boolean);
   popup?: (props: GeoJsonProperties, lang: Lang) => string;
   legend?: LegendEntry[];
   searchable?: (feature: Feature) => { name: string; sub?: string } | null;
@@ -49,6 +55,10 @@ export interface MapLikeClickEvent {
 export interface MapLikeStyleLayer {
   id: string;
   type: string;
+  // Present on basemap layers whose visibility hideBasemapStations() may need to narrow rather
+  // than toggle outright (see manager.ts) — untyped because its shape is a MapLibre filter
+  // expression, not something this module needs to validate.
+  filter?: unknown;
 }
 
 // Minimal subset of maplibregl.Map the layer manager touches — loose enough to satisfy with a
@@ -64,5 +74,6 @@ export interface MapLike {
   removeLayer(id: string): unknown;
   getStyle(): { layers: readonly MapLikeStyleLayer[] };
   setLayoutProperty(layerId: string, name: string, value: unknown): unknown;
+  setFilter(layerId: string, filter: unknown): unknown;
   on(type: 'click', layerId: string, listener: (ev: MapLikeClickEvent) => void): unknown;
 }

@@ -99,7 +99,7 @@ export function mountLayerPanel(root: HTMLElement, opts: LayerPanelOptions): Lay
         swatch.className = 'layer-row__swatch';
         swatch.style.backgroundColor = entry.colour;
         if (entry.dashed) swatch.style.borderStyle = 'dashed';
-        swatch.title = t(entry.labelKey, lang);
+        swatch.title = entry.label ?? (entry.labelKey ? t(entry.labelKey, lang) : '');
         legend.appendChild(swatch);
       }
       row.appendChild(legend);

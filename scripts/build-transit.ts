@@ -383,7 +383,7 @@ function writeLayer(
   const fc = assemble(built.lineFeatures, stations, built.dataAsOf);
   const rounded = roundCoords(fc, 5);
   const json = JSON.stringify(rounded);
-  writeFileSync(join(OUT_DIR, `${id}.geojson`), json);
+  writeFileSync(join(OUT_DIR, `${id}.geojson`), json + '\n');
   if (dropped) {
     console.log(
       `${id}: dropped station points, lines-only file exceeded ${String(MAX_BYTES)} bytes with stations`,

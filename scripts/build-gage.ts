@@ -80,5 +80,5 @@ const fc: FeatureCollection<MultiLineString, GageProps> & {
     source: ['https://www.openstreetmap.org/copyright'],
   },
 };
-writeFileSync('data/gage.geojson', JSON.stringify(fc));
+writeFileSync('data/gage.geojson', JSON.stringify(fc) + '\n');
 console.log(`wrote ${String(features.length)} roads, data_as_of=${dataAsOf}`);

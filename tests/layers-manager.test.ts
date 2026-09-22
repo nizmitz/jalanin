@@ -57,6 +57,9 @@ class FakeMap implements MapLike {
   setLayoutProperty() {
     // not exercised by these tests
   }
+  setFilter() {
+    // not exercised by these tests
+  }
   on() {
     // not exercised by these tests (no def under test declares a popup)
   }
@@ -203,5 +206,51 @@ describe('createLayerManager', () => {
     expect(setLayoutProperty).toHaveBeenCalledWith('transit-station', 'visibility', 'none');
     expect(setLayoutProperty).toHaveBeenCalledWith('pois-icon', 'visibility', 'none');
     expect(setLayoutProperty).not.toHaveBeenCalledWith('building-fill', 'visibility', 'none');
+  });
+
+  it('narrows a mixed-kind pois layer by filter instead of hiding it outright, and restores it', () => {
+    const map = new FakeMap();
+    const setFilter = vi.spyOn(map, 'setFilter');
+    const setLayoutProperty = vi.spyOn(map, 'setLayoutProperty');
+    const poisFilter = [
+      'all',
+      ['in', ['get', 'kind'], ['literal', ['park', 'station', 'bus_stop', 'restaurant']]],
+    ];
+    (map as unknown as { getStyle(): { layers: MapLikeStyleLayer[] } }).getStyle = () => ({
+      layers: [{ id: 'pois', type: 'symbol', filter: poisFilter }],
+    });
+    const manager = createLayerManager(map, () => 'light');
+
+    manager.hideBasemapStations(true);
+    expect(setLayoutProperty).not.toHaveBeenCalled();
+    expect(setFilter).toHaveBeenCalledWith('pois', [
+      'all',
+      ['in', ['get', 'kind'], ['literal', ['park', 'restaurant']]],
+    ]);
+
+    manager.hideBasemapStations(false);
+    expect(setFilter).toHaveBeenLastCalledWith('pois', poisFilter);
+  });
+
+  it('applies a per-layer aboveLabels predicate instead of the def-wide flag', async () => {
+    defs.set('a', {
+      id: 'a',
+      group: 'transit',
+      labelKey: 'layerMrt',
+      defaultOn: true,
+      data: EMPTY_FC,
+      layers: (): LayerStyleSpec[] => [
+        { id: 'a-line', type: 'line', paint: {} },
+        { id: 'a-label', type: 'symbol', layout: {} },
+      ],
+      aboveLabels: (layerId) => layerId === 'a-label',
+    });
+    const map = new FakeMap();
+    const manager = createLayerManager(map, () => 'light');
+
+    await manager.apply(new Set(['a']));
+
+    expect(map.getLayer('a-line')).toMatchObject({ before: 'place-label' });
+    expect(map.getLayer('a-label')).toMatchObject({ before: undefined });
   });
 });

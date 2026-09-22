@@ -457,6 +457,19 @@ button {
   display: none;
 }
 
+/* Line-ref chip inside a transit station popup (src/layers/transit.ts); background is set inline
+   per feature to the line's own colour, so this only fixes the text/shape. */
+.chip {
+  display: inline-block;
+  padding: 1px 6px;
+  margin: 2px 2px 0 0;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

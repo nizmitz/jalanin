@@ -6,6 +6,7 @@ import { addGageLayers, roadState, setGageState } from './gage-layer';
 import { addUserLayers, bearingForFollow, startCompass, startWatch, updateUser } from './geo';
 import { t } from './i18n';
 import { createLayerManager } from './layers/manager';
+import { TRANSIT_IDS } from './layers/transit';
 import { mountLayerPanel } from './layers/panel';
 import { LAYERS } from './layers/registry';
 import { addAttribution, applyTheme, createMap } from './map';
@@ -142,7 +143,10 @@ map.on('style.load', () => {
   // onStyleLoad() re-adds only whatever was enabled before this reset (a toggled-off layer must
   // not come back just because the theme changed); apply() then folds in anything the user
   // enabled since the manager was created (e.g. on the very first load).
-  void layerManager.onStyleLoad().then(() => layerManager.apply(nonGageLayers()));
+  void layerManager
+    .onStyleLoad()
+    .then(() => layerManager.apply(nonGageLayers()))
+    .then(syncBasemapStations);
 });
 
 let followOn = false;
@@ -260,9 +264,15 @@ ui.layersButton.addEventListener('click', () => {
 
 // Keeps the map in sync with layer toggles made through the panel (or any other future writer of
 // the store), independent of where the write happened.
+// Our transit layers replace the basemap's own station POIs while any of them is on.
+function syncBasemapStations(): void {
+  const on = TRANSIT_IDS.some((id) => getLayers().has(id));
+  layerManager.hideBasemapStations(on);
+}
+
 subscribe(() => {
   applyGageVisibility(getLayers().has('gage'));
-  void layerManager.apply(nonGageLayers());
+  void layerManager.apply(nonGageLayers()).then(syncBasemapStations);
 });
 
 {

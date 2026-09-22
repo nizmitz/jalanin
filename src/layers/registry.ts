@@ -1,4 +1,5 @@
 import { GAGE_COLORS } from '../gage-layer';
+import { KRL, LRT, MRT, TRANSJAKARTA } from './transit';
 import type { LayerDef } from './types';
 
 // Gage predates the generic layer system: src/gage-layer.ts renders it directly against the
@@ -19,7 +20,7 @@ export const GAGE_PSEUDO: LayerDef = {
   ],
 };
 
-export const LAYERS: readonly LayerDef[] = [GAGE_PSEUDO];
+export const LAYERS: readonly LayerDef[] = [GAGE_PSEUDO, MRT, LRT, KRL, TRANSJAKARTA];
 
 export function getLayerDef(id: string): LayerDef | undefined {
   return LAYERS.find((def) => def.id === id);

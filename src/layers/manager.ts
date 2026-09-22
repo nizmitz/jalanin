@@ -9,8 +9,49 @@ import type { LayerDef, LayerStyleSpec, MapLike } from './types';
 
 // Basemap layers that draw stations/POIs the transit layers will replace (Task A6). Matched by
 // id prefix rather than a fixed list since the exact protomaps layer ids can shift with the
-// basemap version.
+// basemap version. Probed against @protomaps/basemaps 5.7.2 (`layers('protomaps',
+// namedFlavor('light'), {lang:'id'})`): the only match is a single combined `pois` symbol layer
+// whose `kind` filter mixes `station`/`bus_stop` in with parks, restaurants, universities, etc.
+// (there is no separate `transit_*` layer in this basemap version) — hiding it outright would
+// remove those unrelated POIs too, hence the filter-narrowing path below rather than a blanket
+// visibility toggle. The regex stays broad for forward-compat with basemap versions that do ship
+// dedicated transit/station layers.
 const BASEMAP_STATION_LAYERS = /^(transit|pois)/;
+
+// `kind` values that mean "this feature is a transit station" in the protomaps POI schema.
+const STATION_KINDS = new Set(['station', 'bus_stop']);
+
+// Finds the first `["literal", [...strings]]` node in a filter expression tree — that's where a
+// protomaps `["in", ["get","kind"], ["literal",[...]]]` filter keeps its kind list.
+function findKindLiteral(node: unknown): string[] | null {
+  if (!Array.isArray(node)) return null;
+  if (
+    node[0] === 'literal' &&
+    Array.isArray(node[1]) &&
+    node[1].every((v) => typeof v === 'string')
+  ) {
+    return node[1];
+  }
+  for (const child of node) {
+    const found = findKindLiteral(child);
+    if (found) return found;
+  }
+  return null;
+}
+
+// Deep-clones a filter expression with every kind literal's station/bus_stop entries removed, so
+// the rest of the layer (parks, restaurants, ...) keeps rendering.
+function excludeStationKinds(filter: unknown): unknown {
+  if (!Array.isArray(filter)) return filter;
+  if (
+    filter[0] === 'literal' &&
+    Array.isArray(filter[1]) &&
+    filter[1].every((v) => typeof v === 'string')
+  ) {
+    return ['literal', filter[1].filter((v) => !STATION_KINDS.has(v))];
+  }
+  return filter.map(excludeStationKinds);
+}
 
 // Defs never name their own source (see LayerStyleSpec) — the manager is the single place that
 // decides it, always `def.id`, so a layer and its source can never accidentally mismatch.
@@ -52,8 +93,14 @@ export function createLayerManager(map: MapLike, theme: () => Theme): LayerManag
     return def.data;
   }
 
-  function beforeLayerId(def: LayerDef): string | undefined {
-    if (def.aboveLabels) return undefined;
+  function isAboveLabels(def: LayerDef, layerId: string): boolean {
+    return typeof def.aboveLabels === 'function'
+      ? def.aboveLabels(layerId)
+      : Boolean(def.aboveLabels);
+  }
+
+  function beforeLayerId(def: LayerDef, layerId: string): string | undefined {
+    if (isAboveLabels(def, layerId)) return undefined;
     return map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
   }
 
@@ -98,10 +145,9 @@ export function createLayerManager(map: MapLike, theme: () => Theme): LayerManag
     if (!map.getSource(def.id)) {
       map.addSource(def.id, { type: 'geojson', data });
     }
-    const before = beforeLayerId(def);
     const specs = preparedSpecs(def);
     for (const spec of specs) {
-      if (!map.getLayer(spec.id)) map.addLayer(spec, before);
+      if (!map.getLayer(spec.id)) map.addLayer(spec, beforeLayerId(def, spec.id));
     }
     wirePopup(def, specs);
   }
@@ -141,11 +187,31 @@ export function createLayerManager(map: MapLike, theme: () => Theme): LayerManag
     await apply(enabled);
   }
 
+  // Captured lazily the first time hideBasemapStations touches a mixed-kind layer (e.g. `pois`),
+  // so the filter can be restored exactly rather than re-derived.
+  const originalFilters = new Map<string, unknown>();
+  let loggedIds = false;
+
   function hideBasemapStations(on: boolean): void {
+    const matched: string[] = [];
     for (const layer of map.getStyle().layers) {
-      if (BASEMAP_STATION_LAYERS.test(layer.id)) {
+      if (!BASEMAP_STATION_LAYERS.test(layer.id)) continue;
+      matched.push(layer.id);
+      const kinds = findKindLiteral(layer.filter);
+      const isMixedKindLayer = kinds !== null && kinds.some((k) => !STATION_KINDS.has(k));
+      if (isMixedKindLayer) {
+        // e.g. protomaps' single `pois` layer: narrow its filter instead of hiding it outright,
+        // so unrelated POIs (parks, restaurants, ...) it also draws stay visible.
+        if (!originalFilters.has(layer.id)) originalFilters.set(layer.id, layer.filter);
+        const original = originalFilters.get(layer.id);
+        map.setFilter(layer.id, on ? excludeStationKinds(original) : original);
+      } else {
         map.setLayoutProperty(layer.id, 'visibility', on ? 'none' : 'visible');
       }
+    }
+    if (on && import.meta.env.DEV && !loggedIds) {
+      loggedIds = true;
+      console.log('[jalanin] hiding basemap station layers:', matched);
     }
   }
 
