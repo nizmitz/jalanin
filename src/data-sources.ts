@@ -1,7 +1,7 @@
 // Feeds the About sheet's data-sources table (src/about.ts): one row per curated/layer data file
 // plus the basemap, each with its `data_as_of` and source URL(s) so a stale entry can be flagged
 // (src/freshness.ts) and linked back to where it came from.
-import { HOLIDAYS_SOURCE, HOLIDAYS_YEAR } from './holidays';
+import { HOLIDAYS_AS_OF, HOLIDAYS_SOURCE } from './holidays';
 import { LAYERS } from './layers/registry';
 import { GAGE_ROADS } from './roads';
 import type { StringKey } from './i18n';
@@ -42,7 +42,7 @@ export function listDataSources(): DataSourceEntry[] {
   entries.push({
     id: 'holidays',
     labelKey: 'dataSourceHolidays',
-    asOf: `${String(HOLIDAYS_YEAR)}-01-01`,
+    asOf: HOLIDAYS_AS_OF,
     sources: [HOLIDAYS_SOURCE],
   });
 

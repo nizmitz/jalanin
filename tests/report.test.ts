@@ -9,14 +9,16 @@ describe('buildIssueUrl', () => {
     expect(parsed.searchParams.get('template')).toBe('data.yml');
   });
 
-  it('includes title and body params', () => {
+  it('includes title and the form field params', () => {
     const url = buildIssueUrl({ version: '0.2.0' });
     const parsed = new URL(url);
     expect(parsed.searchParams.get('title')).toBeTruthy();
-    expect(parsed.searchParams.get('body')).toBeTruthy();
+    // YAML issue forms are prefilled per field id, not through a single `body` param.
+    expect(parsed.searchParams.get('layer')).toBe('lainnya');
+    expect(parsed.searchParams.get('context')).toBeTruthy();
   });
 
-  it('encodes layer, name, coordinates, version and user-agent in the body, newlines included', () => {
+  it('fills the form fields with layer, coordinates, name, version and user-agent', () => {
     const url = buildIssueUrl({
       layer: 'mrt',
       name: 'Stasiun Bundaran HI',
@@ -25,19 +27,18 @@ describe('buildIssueUrl', () => {
       version: '0.2.0',
     });
     const parsed = new URL(url);
-    const body = parsed.searchParams.get('body') ?? '';
-    expect(body).toContain('mrt');
-    expect(body).toContain('Stasiun Bundaran HI');
-    expect(body).toContain('-6.195');
-    expect(body).toContain('106.823');
-    expect(body).toContain('0.2.0');
-    expect(body.includes('\n')).toBe(true);
+    expect(parsed.searchParams.get('layer')).toBe('mrt');
+    expect(parsed.searchParams.get('where')).toBe('-6.195, 106.823');
+    const context = parsed.searchParams.get('context') ?? '';
+    expect(context).toContain('Stasiun Bundaran HI');
+    expect(context).toContain('0.2.0');
+    expect(context.includes('\n')).toBe(true);
   });
 
   it('falls back to placeholders when layer/name/coords are omitted', () => {
     const url = buildIssueUrl({ version: '0.2.0' });
     const parsed = new URL(url);
-    const body = parsed.searchParams.get('body') ?? '';
-    expect(body).toContain('-');
+    expect(parsed.searchParams.get('where')).toBe('-');
+    expect(parsed.searchParams.get('context')).toContain('Nama: -');
   });
 });

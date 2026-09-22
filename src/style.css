@@ -484,3 +484,19 @@ button {
   color: var(--muted);
   font-size: 11px;
 }
+
+/* "perlu dicek" marker next to a data source older than 180 days (src/about.ts). */
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.badge--amber {
+  background: var(--amber);
+  color: #141414;
+}

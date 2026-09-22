@@ -20,14 +20,17 @@ function coordText(ctx: IssueContext): string {
 export function buildIssueUrl(ctx: IssueContext): string {
   const title = ctx.name ? `Data salah: ${ctx.name}` : 'Data salah';
   const userAgent = typeof navigator === 'undefined' ? '-' : navigator.userAgent;
-  const body = [
-    `Layer: ${ctx.layer ?? '-'}`,
-    `Nama: ${ctx.name ?? '-'}`,
-    `Koordinat: ${coordText(ctx)}`,
-    `Versi aplikasi: ${ctx.version}`,
-    `User agent: ${userAgent}`,
-  ].join('\n');
-
-  const params = new URLSearchParams({ template: 'data.yml', title, body });
+  // A YAML issue form is prefilled per field id, not with a single `body` parameter.
+  const params = new URLSearchParams({
+    template: 'data.yml',
+    title,
+    layer: ctx.layer ?? 'lainnya',
+    where: coordText(ctx),
+    context: [
+      `Nama: ${ctx.name ?? '-'}`,
+      `Versi aplikasi: ${ctx.version}`,
+      `User agent: ${userAgent}`,
+    ].join('\n'),
+  });
   return `${ISSUE_URL}?${params.toString()}`;
 }

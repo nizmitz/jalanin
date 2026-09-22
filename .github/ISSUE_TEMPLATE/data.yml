@@ -33,3 +33,8 @@ body:
     attributes:
       label: Sumber (opsional)
       description: Tautan ke Pergub, Dishub, operator, atau berita yang mendukung.
+  - type: textarea
+    id: context
+    attributes:
+      label: Konteks aplikasi
+      description: Terisi otomatis dari tombol "Lapor data salah".
