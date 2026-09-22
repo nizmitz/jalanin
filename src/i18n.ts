@@ -67,7 +67,18 @@ export type StringKey =
   | 'groupRules'
   | 'groupTransit'
   | 'groupRoad'
-  | 'groupHazard';
+  | 'groupHazard'
+  | 'whatItIsBody1'
+  | 'whatItIsBody2'
+  | 'needsReview'
+  | 'sourceLink'
+  | 'attributionText'
+  | 'disclaimer'
+  | 'privacyBody'
+  | 'installHintIOS'
+  | 'installHintAndroid'
+  | 'dataSourceHolidays'
+  | 'dataSourceBasemap';
 
 export const STRINGS: Record<Lang, Record<StringKey, string>> = {
   id: {
@@ -138,6 +149,19 @@ export const STRINGS: Record<Lang, Record<StringKey, string>> = {
     groupTransit: 'Transportasi umum',
     groupRoad: 'Jalan',
     groupHazard: 'Bahaya',
+    whatItIsBody1:
+      'Jalanin menunjukkan gage, jalur transit, dan data jalan Jakarta dalam satu peta.',
+    whatItIsBody2: 'Data berasal dari OpenStreetMap dan sumber resmi, diperbarui berkala.',
+    needsReview: 'Perlu dicek',
+    sourceLink: 'Sumber',
+    attributionText:
+      'Peta: © kontributor OpenStreetMap (ODbL), Protomaps. Data: Dishub DKI, KAI Commuter, MRT Jakarta, LRT, Transjakarta.',
+    disclaimer: 'Bukan sumber resmi. Cek rambu di jalan.',
+    privacyBody: 'Tidak ada pelacakan. Server hanya menyimpan log akses nginx.',
+    installHintIOS: 'iOS: Bagikan → Tambah ke Layar Utama',
+    installHintAndroid: 'Android: Pasang aplikasi',
+    dataSourceHolidays: 'Hari libur nasional',
+    dataSourceBasemap: 'Peta dasar',
   },
   en: {
     title: 'Jalanin',
@@ -207,6 +231,18 @@ export const STRINGS: Record<Lang, Record<StringKey, string>> = {
     groupTransit: 'Transit',
     groupRoad: 'Road',
     groupHazard: 'Hazard',
+    whatItIsBody1: 'Jalanin shows gage, transit lines, and Jakarta road data on one map.',
+    whatItIsBody2: 'Data comes from OpenStreetMap and official sources, updated regularly.',
+    needsReview: 'Needs review',
+    sourceLink: 'Source',
+    attributionText:
+      'Map: © OpenStreetMap contributors (ODbL), Protomaps. Data: Dishub DKI, KAI Commuter, MRT Jakarta, LRT, Transjakarta.',
+    disclaimer: 'Not an official source. Check the signs on the road.',
+    privacyBody: 'No tracking. The server only keeps nginx access logs.',
+    installHintIOS: 'iOS: Share → Add to Home Screen',
+    installHintAndroid: 'Android: Install app',
+    dataSourceHolidays: 'National holidays',
+    dataSourceBasemap: 'Basemap',
   },
 };
 

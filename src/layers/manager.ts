@@ -1,11 +1,16 @@
 import * as maplibregl from 'maplibre-gl';
-import type { FeatureCollection } from 'geojson';
+import type { FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { LayerSpecification } from 'maplibre-gl';
+import { escapeHtml } from '../html';
+import { t } from '../i18n';
+import type { Lang } from '../i18n';
+import { buildIssueUrl } from '../report';
 import { getLang } from '../store';
+import { APP_VERSION } from '../version';
 import type { Theme } from '../theme';
 import { getLayerDef } from './registry';
 import { layerIdHasPrefix } from './types';
-import type { LayerDef, LayerStyleSpec, MapLike } from './types';
+import type { LayerDef, LayerStyleSpec, MapLike, MapLikeClickEvent } from './types';
 
 // Basemap layers that draw stations/POIs the transit layers will replace (Task A6). Matched by
 // id prefix rather than a fixed list since the exact protomaps layer ids can shift with the
@@ -129,12 +134,34 @@ export function createLayerManager(map: MapLike, theme: () => Theme): LayerManag
       map.on('click', spec.id, (e) => {
         const feature = e.features?.[0];
         if (!feature) return;
+        const lang = getLang();
         new maplibregl.Popup()
           .setLngLat(e.lngLat)
-          .setHTML(popup(feature.properties, getLang()))
+          .setHTML(
+            popup(feature.properties, lang) + reportLink(def.id, feature.properties, e, lang),
+          )
           .addTo(map as unknown as maplibregl.Map);
       });
     }
+  }
+
+  // Every popup ends with a "report wrong data" link that prefills a GitHub issue with the
+  // layer, feature name and tapped coordinates.
+  function reportLink(
+    layerId: string,
+    props: GeoJsonProperties,
+    e: MapLikeClickEvent,
+    lang: Lang,
+  ): string {
+    const name = typeof props?.name === 'string' ? props.name : undefined;
+    const url = buildIssueUrl({
+      layer: layerId,
+      ...(name ? { name } : {}),
+      lat: Number(e.lngLat.lat.toFixed(5)),
+      lon: Number(e.lngLat.lng.toFixed(5)),
+      version: APP_VERSION,
+    });
+    return `<br><a class="report" href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(t('reportData', lang))}</a>`;
   }
 
   async function addDef(def: LayerDef): Promise<void> {

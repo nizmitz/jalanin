@@ -8,6 +8,7 @@ function deps() {
     onFollow: vi.fn(),
     onTheme: vi.fn(),
     onLang: vi.fn(),
+    onAbout: vi.fn(),
   };
 }
 
@@ -149,13 +150,22 @@ describe('mountUi FAB set', () => {
     expect(ui.layersButton.getAttribute('aria-label')).toBeTruthy();
   });
 
-  it('theme, lang, share and about live inside the more sheet, share/about hidden for now', () => {
+  it('theme, lang, share and about live inside the more sheet; share stays hidden, about is visible', () => {
     mountUi(root, deps());
     const sheet = root.querySelector('.more-sheet');
     expect(sheet?.querySelector('[data-action="theme"]')).not.toBeNull();
     expect(sheet?.querySelector('[data-action="lang"]')).not.toBeNull();
     expect(sheet?.querySelector('[data-action="share"]')?.hasAttribute('hidden')).toBe(true);
-    expect(sheet?.querySelector('[data-action="about"]')?.hasAttribute('hidden')).toBe(true);
+    expect(sheet?.querySelector('[data-action="about"]')?.hasAttribute('hidden')).toBe(false);
+  });
+
+  it('clicking the about item closes the more sheet and calls onAbout', () => {
+    const d = deps();
+    const ui = mountUi(root, d);
+    ui.openMore();
+    root.querySelector<HTMLButtonElement>('[data-action="about"]')?.click();
+    expect(d.onAbout).toHaveBeenCalledTimes(1);
+    expect(root.querySelector('.more-sheet')?.hasAttribute('hidden')).toBe(true);
   });
 
   it('openMore shows the more sheet as a labelled modal dialog and moves focus into it', () => {
@@ -198,7 +208,7 @@ describe('mountUi FAB set', () => {
 
     ui.openMore();
 
-    // share/about are hidden for now, so close/theme/lang are the only focusable elements.
+    // share is hidden for now; close/theme/lang/about are the focusable elements.
     const focusable = [
       ...sheet.querySelectorAll<HTMLElement>(
         'button:not([disabled]):not([hidden]), [data-more-close]',

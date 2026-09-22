@@ -25,6 +25,8 @@ import {
   subscribe,
 } from './store';
 import { mountUi } from './ui';
+import { mountAbout } from './about';
+import { APP_VERSION } from './version';
 import { acquireWakeLock } from './wake';
 import type { Fix } from './geo';
 import type { MapLike } from './layers/types';
@@ -78,13 +80,27 @@ const ui = mountUi(uiEl, {
     applyTheme(map, theme);
     ui.setTheme(theme);
   },
+  onAbout() {
+    about.open();
+  },
   onLang() {
     lang = lang === 'id' ? 'en' : 'id';
     setLang(lang);
     ui.setLang(lang);
     layerPanel.setLang(lang);
+    about.setLang(lang);
     const { verdict: v, active, day } = currentState();
     ui.setStatus(v, active, day);
+  },
+});
+
+const aboutEl = document.createElement('div');
+app.append(aboutEl);
+const about = mountAbout(aboutEl, {
+  lang,
+  version: APP_VERSION,
+  onClose() {
+    ui.layersButton.focus();
   },
 });
 

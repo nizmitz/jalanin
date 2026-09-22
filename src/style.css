@@ -476,3 +476,11 @@ button {
     animation: none !important;
   }
 }
+
+/* "Lapor data salah" link at the foot of every feature popup (src/layers/manager.ts). */
+.maplibregl-popup-content .report {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}

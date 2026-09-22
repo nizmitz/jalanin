@@ -10,6 +10,7 @@ export interface UiDeps {
   onFollow: () => void;
   onTheme: () => void;
   onLang: () => void;
+  onAbout: () => void;
 }
 
 export interface Ui {
@@ -93,7 +94,7 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
         <button type="button" class="more-sheet__item" data-action="theme"><span data-theme-icon>${deps.initial.theme === 'dark' ? SUN_SVG : MOON_SVG}</span><span data-theme-label></span></button>
         <button type="button" class="more-sheet__item" data-action="lang"><span data-lang-label></span></button>
         <button type="button" class="more-sheet__item" data-action="share" hidden disabled></button>
-        <button type="button" class="more-sheet__item" data-action="about" hidden></button>
+        <button type="button" class="more-sheet__item" data-action="about"><span data-about-label></span></button>
       </div>
     </div>
     <div class="offline-banner" data-offline-banner hidden></div>
@@ -116,6 +117,8 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
   const themeLabelEl = root.querySelector<HTMLSpanElement>('[data-theme-label]');
   const langBtn = root.querySelector<HTMLButtonElement>('[data-action="lang"]');
   const langLabelEl = root.querySelector<HTMLSpanElement>('[data-lang-label]');
+  const aboutBtn = root.querySelector<HTMLButtonElement>('[data-action="about"]');
+  const aboutLabelEl = root.querySelector<HTMLSpanElement>('[data-about-label]');
   const alertEl = root.querySelector<HTMLDivElement>('[data-alert]');
   const toastEl = root.querySelector<HTMLDivElement>('[data-toast]');
   const footerEl = root.querySelector<HTMLDivElement>('[data-footer]');
@@ -172,6 +175,10 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
 
   moreBtnEl.addEventListener('click', openMore);
   moreCloseBtnEl.addEventListener('click', closeMore);
+  aboutBtn?.addEventListener('click', () => {
+    closeMore();
+    deps.onAbout();
+  });
 
   function renderStatus(): void {
     if (!statusEl) return;
@@ -199,6 +206,8 @@ export function mountUi(root: HTMLElement, deps: UiDeps): Ui {
       );
     }
     if (langLabelEl) langLabelEl.textContent = lang === 'id' ? 'English' : 'Bahasa Indonesia';
+    if (aboutBtn) aboutBtn.setAttribute('aria-label', t('about', lang));
+    if (aboutLabelEl) aboutLabelEl.textContent = t('about', lang);
     document.documentElement.lang = lang;
     if (footerEl) footerEl.textContent = t('dataAsOf', lang);
     renderStatus();
