@@ -1,5 +1,10 @@
 // Generates the PWA/home-screen icons from a single inline SVG: a plate-black square with a
-// diagonal amber road stripe and a dashed white centre line. Run via `make icons`.
+// diagonal amber road stripe, a dashed white centre line, and a bold white "J" (Jalanin) in the
+// bottom-left. Run via `make icons`.
+//
+// The "J" is drawn as a stroked path, not an SVG <text> element: sharp rasterises SVG through
+// librsvg, whose font availability depends on what's installed on the host/CI runner, so a text
+// glyph can silently fall back to a missing-font box. A path renders identically everywhere.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 
@@ -15,6 +20,16 @@ function iconSvg(size: number, corner: number): string {
   const overhang = n(-size * 0.15);
   const far = n(size * 1.15);
   const centreWidth = n(size * 0.02);
+  // "J": a vertical stem curving into a hook at the bottom, positioned bottom-left and sized to
+  // stay within a maskable icon's safe zone (a circle of radius 40% of the canvas from centre).
+  const jStroke = n(size * 0.09);
+  const jTopX = n(size * 0.34);
+  const jTopY = n(size * 0.4);
+  const jStemBottomX = size * 0.34;
+  const jStemBottomY = size * 0.62;
+  const jHookR = size * 0.14;
+  const jHookEndX = n(size * 0.2);
+  const jHookEndY = n(size * 0.74);
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${n(size)}" height="${n(size)}" viewBox="0 0 ${n(size)} ${n(size)}">
   <rect x="0" y="0" width="${n(size)}" height="${n(size)}" rx="${n(corner)}" ry="${n(corner)}" fill="${PLATE_BLACK}" />
@@ -24,6 +39,8 @@ function iconSvg(size: number, corner: number): string {
     <line x1="${overhang}" y1="${far}" x2="${far}" y2="${overhang}"
       stroke="#ffffff" stroke-width="${centreWidth}" stroke-dasharray="${dash} ${gap}" />
   </g>
+  <path d="M ${jTopX} ${jTopY} L ${n(jStemBottomX)} ${n(jStemBottomY)} A ${n(jHookR)} ${n(jHookR)} 0 0 1 ${jHookEndX} ${jHookEndY}"
+    fill="none" stroke="#ffffff" stroke-width="${jStroke}" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 }
 

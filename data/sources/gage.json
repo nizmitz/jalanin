@@ -1,0 +1,190 @@
+{
+  "bbox": "-6.45,106.55,-6.05,107.05",
+  "area": "ID-JK",
+  "items": [
+    {
+      "id": "pintu-besar-selatan",
+      "name": "Jl. Pintu Besar Selatan",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Pintu Besar Selatan$\"]"
+    },
+    {
+      "id": "gajah-mada",
+      "name": "Jl. Gajah Mada",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Gajah Mada$\"]"
+    },
+    {
+      "id": "hayam-wuruk",
+      "name": "Jl. Hayam Wuruk",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Hayam Wuruk$\"]"
+    },
+    {
+      "id": "majapahit",
+      "name": "Jl. Majapahit",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Majapahit$\"]"
+    },
+    {
+      "id": "medan-merdeka-barat",
+      "name": "Jl. Medan Merdeka Barat",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Medan Merdeka Barat$\"]"
+    },
+    {
+      "id": "mh-thamrin",
+      "name": "Jl. M.H. Thamrin",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (M\\\\.? ?H\\\\.?|Mohammad Husni) Thamrin$\"]"
+    },
+    {
+      "id": "jenderal-sudirman",
+      "name": "Jl. Jenderal Sudirman",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Jenderal Sudirman$\"]"
+    },
+    {
+      "id": "sisingamangaraja",
+      "name": "Jl. Sisingamangaraja",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Sisingamangaraja$\"]"
+    },
+    {
+      "id": "panglima-polim",
+      "name": "Jl. Panglima Polim",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Panglima Polim( Raya)?$\"]"
+    },
+    {
+      "id": "fatmawati",
+      "name": "Jl. Fatmawati",
+      "group": "spine",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (R\\\\.? ?S\\\\.? )?Fatmawati( Raya)?$\"]",
+      "note": "Ketimun 1 → simpang T.B. Simatupang",
+      "clip": [106.79, -6.3, 106.8, -6.26]
+    },
+    {
+      "id": "suryopranoto",
+      "name": "Jl. Suryopranoto",
+      "group": "west",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Suryopranoto$\"]"
+    },
+    {
+      "id": "balikpapan",
+      "name": "Jl. Balikpapan",
+      "group": "west",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Balikpapan Raya$\"]"
+    },
+    {
+      "id": "kyai-caringin",
+      "name": "Jl. Kyai Caringin",
+      "group": "west",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan K\\\\.?(yai|H\\\\.?) Caringin$\"]"
+    },
+    {
+      "id": "tomang-raya",
+      "name": "Jl. Tomang Raya",
+      "group": "west",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Tomang Raya$\"]"
+    },
+    {
+      "id": "s-parman",
+      "name": "Jl. Jenderal S. Parman",
+      "group": "west",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Letnan Jenderal Siswondo Parman$\"]",
+      "note": "Tomang Raya → Gatot Subroto",
+      "clip": [106.78, -6.2, 106.81, -6.16]
+    },
+    {
+      "id": "gatot-subroto",
+      "name": "Jl. Gatot Subroto",
+      "group": "ring",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (Jenderal )?Gatot Subroto$\"]"
+    },
+    {
+      "id": "mt-haryono",
+      "name": "Jl. M.T. Haryono",
+      "group": "ring",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Letnan Jenderal MT Haryono$\"]"
+    },
+    {
+      "id": "hr-rasuna-said",
+      "name": "Jl. H.R. Rasuna Said",
+      "group": "ring",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (Terusan Kuningan )?Hajjah R\\\\.? Rasuna Said$\"]"
+    },
+    {
+      "id": "di-panjaitan",
+      "name": "Jl. D.I. Panjaitan",
+      "group": "ring",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (Mayjen )?D\\\\.? ?I\\\\.? Panjaitan$\"]"
+    },
+    {
+      "id": "a-yani",
+      "name": "Jl. Jenderal A. Yani",
+      "group": "ring",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan (Jenderal )?A(hmad)?\\\\.? Yani$\"]",
+      "note": "Bekasi Timur Raya → Perintis Kemerdekaan",
+      "clip": [106.86, -6.21, 106.9, -6.16]
+    },
+    {
+      "id": "pramuka",
+      "name": "Jl. Pramuka",
+      "group": "central",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Pramuka( Raya)?$\"]"
+    },
+    {
+      "id": "salemba-raya",
+      "name": "Jl. Salemba Raya",
+      "group": "central",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Salemba Raya$\"]",
+      "note": "Paseban Raya → Diponegoro",
+      "clip": [106.84, -6.2, 106.86, -6.18]
+    },
+    {
+      "id": "kramat-raya",
+      "name": "Jl. Kramat Raya",
+      "group": "central",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Kramat Raya$\"]"
+    },
+    {
+      "id": "stasiun-senen",
+      "name": "Jl. Stasiun Senen",
+      "group": "central",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Pasar Senen$\"]",
+      "note": "OSM has no way named Jalan Stasiun Senen; Jalan Pasar Senen is the road in front of Stasiun Senen and is the closest real-world match"
+    },
+    {
+      "id": "gunung-sahari",
+      "name": "Jl. Gunung Sahari",
+      "group": "central",
+      "kind": "ways",
+      "query": "way[\"highway\"~\"^(primary|secondary|tertiary|trunk|primary_link|secondary_link|tertiary_link|trunk_link|motorway_link)$\"][\"name\"~\"^Jalan Gunung Sahari( Raya)?$\"]"
+    }
+  ]
+}

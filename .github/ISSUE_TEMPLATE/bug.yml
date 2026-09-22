@@ -1,0 +1,19 @@
+name: Bug
+description: Aplikasi error, tampilan rusak, atau fitur tidak jalan.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Apa yang terjadi?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah untuk mengulang
+  - type: input
+    id: device
+    attributes:
+      label: Perangkat & browser
+      description: Contoh — iPhone 14, Safari 18.

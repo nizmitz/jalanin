@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { FeatureCollection, MultiLineString } from 'geojson';
 import type { GageProps } from '../src/types';
+import type { SourceFile } from '../scripts/lib';
 
 const fc = JSON.parse(readFileSync('data/gage.geojson', 'utf8')) as FeatureCollection<
   MultiLineString,
   GageProps
->;
+> & { properties: { data_as_of: string; source: string[] } };
+const source = JSON.parse(readFileSync('data/sources/gage.json', 'utf8')) as SourceFile;
 const JKT = { minLon: 106.6, maxLon: 107.05, minLat: -6.45, maxLat: -6.05 };
 
 describe('gage.geojson', () => {
@@ -27,11 +29,7 @@ describe('gage.geojson', () => {
     }
   });
   it('clipped roads stay inside their clip bbox', () => {
-    const segs = JSON.parse(readFileSync('data/segments.json', 'utf8')) as {
-      id: string;
-      clip?: [number, number, number, number];
-    }[];
-    for (const s of segs) {
+    for (const s of source.items) {
       if (!s.clip) continue;
       const f = fc.features.find((x) => x.properties.id === s.id);
       expect(f, s.id).toBeDefined();
@@ -46,5 +44,9 @@ describe('gage.geojson', () => {
   });
   it('file under 400 KB', () => {
     expect(readFileSync('data/gage.geojson').byteLength).toBeLessThan(400_000);
+  });
+  it('has a data_as_of date and a source list', () => {
+    expect(fc.properties.data_as_of).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(fc.properties.source).toEqual(['https://www.openstreetmap.org/copyright']);
   });
 });

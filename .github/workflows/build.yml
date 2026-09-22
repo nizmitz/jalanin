@@ -6,8 +6,8 @@ on:
 permissions:
   contents: read
 env:
-  IMAGE: ghcr.io/nizmitz/gage-jakarta
-  LOCAL_TAG: gage-jakarta:scan
+  IMAGE: ghcr.io/nizmitz/jalanin
+  LOCAL_TAG: jalanin:scan
 jobs:
   image:
     runs-on: ubuntu-latest

@@ -1,7 +1,12 @@
-# gage-jakarta
+# Jalanin
 
-Mobile-first static PWA (Vite + TS, MapLibre GL JS + PMTiles) showing Jakarta's
-25 ganjil-genap roads. No backend; deployed as a static bundle behind nginx.
+Mobile-first static PWA (Vite + TS, MapLibre GL JS + PMTiles) for driving in Jakarta:
+the 25 ganjil-genap roads plus MRT/LRT/KRL/Transjakarta layers. No backend; deployed as
+a static bundle behind nginx.
+
+Layers are declared in `src/layers/registry.ts` (`LayerDef`) and added to the map by
+`src/layers/manager.ts`, which survives style reloads and injects each layer's source.
+Data files live in `data/layers/`, rebuilt from `data/sources/*.json` recipes.
 
 ## Commands
 
@@ -18,10 +23,13 @@ Rules and geometry are manually curated, not scraped live:
 - `src/gage.ts` `HOURS` -- gage hour windows (WIB); edit here if Pergub changes them.
 - `src/data/holidays-2026.json` -- yearly holiday list; add a new year's file and wire it up
   in `src/holidays.ts` before Jan 1.
-- `data/segments.json` / `data/gage.geojson` -- the 25 road geometries; regenerate via
-  `scripts/fetch-roads.ts` + `scripts/trim-roads.ts` if a road list changes.
+- `data/sources/gage.json` / `data/gage.geojson` -- the 25 road geometries; regenerate via
+  `make gage` (`scripts/fetch-osm.ts` + `scripts/build-gage.ts`) if a road list changes.
+- `data/sources/transit.json` / `data/layers/*.geojson` -- MRT/LRT/KRL/Transjakarta;
+  regenerate via `make transit`. Keep every layer file under 350 KB (tests enforce it).
+- `npx tsx scripts/list-data-as-of.ts` prints each data file's capture date.
 
 ## Deploy
 
 See `deploy/README.md` for the droplet runbook (`maps.nizmitz.com`, ghost nginx reverse proxy).
-CI publishes `ghcr.io/nizmitz/gage-jakarta`; deploy is a manual `docker compose pull && up -d`.
+CI publishes `ghcr.io/nizmitz/jalanin`; deploy is a manual `docker compose pull && up -d`.

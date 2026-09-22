@@ -5,14 +5,31 @@ import { HOLIDAYS } from './holidays';
 import { addGageLayers, roadState, setGageState } from './gage-layer';
 import { addUserLayers, bearingForFollow, startCompass, startWatch, updateUser } from './geo';
 import { t } from './i18n';
+import { createLayerManager } from './layers/manager';
+import { TRANSIT_IDS } from './layers/transit';
+import { mountLayerPanel } from './layers/panel';
+import { LAYERS } from './layers/registry';
 import { addAttribution, applyTheme, createMap } from './map';
 import { basemapCached, offlineSupported, prefetchBasemap, storageEstimate } from './offline';
 import { createProximity } from './proximity';
 import { GAGE_ROADS } from './roads';
-import { getLang, getParity, getTheme, setLang, setParity, setTheme } from './store';
+import {
+  getLang,
+  getLayers,
+  getParity,
+  getTheme,
+  setLang,
+  setLayer,
+  setParity,
+  setTheme,
+  subscribe,
+} from './store';
 import { mountUi } from './ui';
+import { mountAbout } from './about';
+import { APP_VERSION } from './version';
 import { acquireWakeLock } from './wake';
 import type { Fix } from './geo';
+import type { MapLike } from './layers/types';
 import type { Theme } from './theme';
 import type { DayKind, Parity } from './gage';
 import type { ReleaseWakeLock } from './wake';
@@ -39,6 +56,82 @@ document.documentElement.dataset.theme = theme;
 const map = createMap(mapEl, theme);
 addAttribution(map);
 
+// Created before anything that might call its methods (style.load can fire as early as the next
+// microtask once the map is constructed): applyGageVisibility() below calls ui.showAlert(), and
+// nothing must be able to reach that call while `ui` is still in its temporal dead zone.
+const ui = mountUi(uiEl, {
+  initial: { parity, theme, lang },
+  onParity(p) {
+    parity = p;
+    setParity(p);
+    const { state, verdict: v, active, day } = currentState();
+    setGageState(map, state);
+    ui.setStatus(v, active, day);
+    ui.setParity(p);
+  },
+  onFollow() {
+    if (followOn) stopFollow();
+    else startFollow();
+  },
+  onTheme() {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(theme);
+    document.documentElement.dataset.theme = theme;
+    applyTheme(map, theme);
+    ui.setTheme(theme);
+  },
+  onAbout() {
+    about.open();
+  },
+  onLang() {
+    lang = lang === 'id' ? 'en' : 'id';
+    setLang(lang);
+    ui.setLang(lang);
+    layerPanel.setLang(lang);
+    about.setLang(lang);
+    const { verdict: v, active, day } = currentState();
+    ui.setStatus(v, active, day);
+  },
+});
+
+const aboutEl = document.createElement('div');
+app.append(aboutEl);
+const about = mountAbout(aboutEl, {
+  lang,
+  version: APP_VERSION,
+  onClose() {
+    ui.layersButton.focus();
+  },
+});
+
+// The manager only ever sees maplibregl.Map through this narrow, hand-picked interface (see
+// src/layers/types.ts) — cast once here rather than have every call site cast individually.
+const layerManager = createLayerManager(map as unknown as MapLike, () => theme);
+
+// Gage predates the generic layer system (src/gage-layer.ts), so its on/off state is tracked
+// here rather than going through the manager; proximity alerts must stay off while it's hidden.
+let gageVisible = getLayers().has('gage');
+
+function nonGageLayers(): Set<string> {
+  const enabled = new Set(getLayers());
+  enabled.delete('gage');
+  return enabled;
+}
+
+function applyGageVisibility(on: boolean): void {
+  const wasOn = gageVisible;
+  gageVisible = on;
+  const visibility = on ? 'visible' : 'none';
+  if (map.getLayer('gage-casing')) map.setLayoutProperty('gage-casing', 'visibility', visibility);
+  if (map.getLayer('gage-line')) map.setLayoutProperty('gage-line', 'visibility', visibility);
+  if (!on && wasOn) {
+    // Turning gage off mid-approach must not let it silently fire "entered" again the moment
+    // it's re-enabled without the user having actually left and re-entered the road.
+    proximity.reset();
+    ui.showAlert(null);
+  }
+}
+
 function currentState(): {
   state: ReturnType<typeof roadState>;
   verdict: ReturnType<typeof verdict>;
@@ -62,6 +155,14 @@ map.on('style.load', () => {
   // Layers are re-created empty by the addSource above; repaint the last known fix so the
   // user's dot/heading/accuracy circle don't vanish across a theme change.
   if (lastFix) updateUser(map, lastFix, lastBearing);
+  applyGageVisibility(gageVisible);
+  // onStyleLoad() re-adds only whatever was enabled before this reset (a toggled-off layer must
+  // not come back just because the theme changed); apply() then folds in anything the user
+  // enabled since the manager was created (e.g. on the very first load).
+  void layerManager
+    .onStyleLoad()
+    .then(() => layerManager.apply(nonGageLayers()))
+    .then(syncBasemapStations);
 });
 
 let followOn = false;
@@ -100,6 +201,9 @@ function onFix(f: Fix): void {
       duration: 500,
     });
   }
+
+  // Proximity alerts are gage-only and must stay silent while the layer itself is hidden.
+  if (!gageVisible) return;
 
   const blocked = currentState().state === 'blocked';
   const { entered, inside } = proximity.update(f, blocked, GAGE_ROADS);
@@ -154,34 +258,37 @@ map.on('dragstart', () => {
   if (followOn) stopFollow();
 });
 
-const ui = mountUi(uiEl, {
-  initial: { parity, theme, lang },
-  onParity(p) {
-    parity = p;
-    setParity(p);
-    const { state, verdict: v, active, day } = currentState();
-    setGageState(map, state);
-    ui.setStatus(v, active, day);
-    ui.setParity(p);
+// `getLayers()` returns the store's own Set instance, mutated in place by setLayer() — the panel
+// always reads current state from it, so there's nothing extra to push on toggle besides the
+// store write itself.
+const layerPanel = mountLayerPanel(uiEl, {
+  lang,
+  enabled: getLayers(),
+  defs: LAYERS,
+  onToggle(id, on) {
+    setLayer(id, on);
   },
-  onFollow() {
-    if (followOn) stopFollow();
-    else startFollow();
+  onClose() {
+    // Nothing else to do: closing just hides the sheet and returns focus.
   },
-  onTheme() {
-    theme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(theme);
-    document.documentElement.dataset.theme = theme;
-    applyTheme(map, theme);
-    ui.setTheme(theme);
-  },
-  onLang() {
-    lang = lang === 'id' ? 'en' : 'id';
-    setLang(lang);
-    ui.setLang(lang);
-    const { verdict: v, active, day } = currentState();
-    ui.setStatus(v, active, day);
-  },
+});
+
+ui.layersButton.addEventListener('click', () => {
+  ui.closeMore();
+  layerPanel.open();
+});
+
+// Keeps the map in sync with layer toggles made through the panel (or any other future writer of
+// the store), independent of where the write happened.
+// Our transit layers replace the basemap's own station POIs while any of them is on.
+function syncBasemapStations(): void {
+  const on = TRANSIT_IDS.some((id) => getLayers().has(id));
+  layerManager.hideBasemapStations(on);
+}
+
+subscribe(() => {
+  applyGageVisibility(getLayers().has('gage'));
+  void layerManager.apply(nonGageLayers()).then(syncBasemapStations);
 });
 
 {

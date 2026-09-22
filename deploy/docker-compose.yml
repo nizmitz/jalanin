@@ -1,9 +1,9 @@
-# /opt/gage-jakarta/docker-compose.yml on the droplet.
-# Joins the existing `ghost_default` network so the ghost nginx container can proxy to `gage-jakarta:8080`.
+# /opt/jalanin/docker-compose.yml on the droplet.
+# Joins the existing `ghost_default` network so the ghost nginx container can proxy to `jalanin:8080`.
 services:
-  gage-jakarta:
-    image: ghcr.io/nizmitz/gage-jakarta:latest
-    container_name: gage-jakarta
+  jalanin:
+    image: ghcr.io/nizmitz/jalanin:latest
+    container_name: jalanin
     restart: unless-stopped
     read_only: true
     security_opt: [no-new-privileges:true]

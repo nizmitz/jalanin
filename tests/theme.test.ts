@@ -36,6 +36,26 @@ describe('systemTheme', () => {
     expect(systemTheme()).toBe('light');
   });
 
+  it('reads the legacy gage.theme key when jalanin.theme is absent', () => {
+    mockMatchMedia(false);
+    localStorage.setItem('gage.theme', 'dark');
+    expect(systemTheme()).toBe('dark');
+  });
+
+  it('prefers the new key over the legacy one', () => {
+    mockMatchMedia(false);
+    localStorage.setItem('gage.theme', 'dark');
+    localStorage.setItem(THEME_KEY, 'light');
+    expect(systemTheme()).toBe('light');
+  });
+
+  it('writes only the new key, never the legacy one', () => {
+    mockMatchMedia(false);
+    setTheme('dark');
+    expect(localStorage.getItem('gage.theme')).toBeNull();
+    expect(localStorage.getItem(THEME_KEY)).toBe('dark');
+  });
+
   it('falls back to the OS when storage throws', () => {
     mockMatchMedia(true);
     const boom = () => {

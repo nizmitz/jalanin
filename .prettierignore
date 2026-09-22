@@ -2,3 +2,4 @@ dist
 dev-dist
 public/basemap-assets
 data/gage.geojson
+data/layers/*.geojson

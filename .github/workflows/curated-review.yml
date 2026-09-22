@@ -1,0 +1,57 @@
+name: curated-review
+# Quarterly nudge: the curated and OSM-derived data files go stale silently, so open one issue
+# every quarter listing each file and how old its contents are.
+on:
+  schedule:
+    - cron: '0 2 1 1,4,7,10 *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: curated-review
+  cancel-in-progress: false
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with: { node-version: '22', cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - name: Skip when this quarter's review issue already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          quarter=$(( ($(date -u +%-m) - 1) / 3 + 1 ))
+          year=$(date -u +%Y)
+          title="Review curated data (Q${quarter} ${year})"
+          # Open or closed: one issue per quarter, so a rerun after closing it stays quiet.
+          count=$(gh issue list --repo "$REPO" --label data-review --state all \
+            --search "\"$title\" in:title" --json title \
+            --jq "[.[] | select(.title == \"$title\")] | length")
+          {
+            echo "count=$count"
+            echo "title=$title"
+          } >> "$GITHUB_OUTPUT"
+      - name: Build the table
+        if: steps.existing.outputs.count == '0'
+        run: npx tsx scripts/list-data-as-of.ts > body.md
+      - name: Open the issue
+        if: steps.existing.outputs.count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TITLE: ${{ steps.existing.outputs.title }}
+        run: |
+          set -euo pipefail
+          gh issue create --repo "$REPO" \
+            --title "$TITLE" \
+            --label data-review \
+            --body-file body.md

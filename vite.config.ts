@@ -1,9 +1,13 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import pkg from './package.json' with { type: 'json' };
 
 export default defineConfig({
   build: { target: 'es2022', sourcemap: false },
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
+  },
   plugins: [
     VitePWA({
       strategies: 'injectManifest',
@@ -22,8 +26,9 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5_000_000,
       },
       manifest: {
-        name: 'Gage Jakarta',
-        short_name: 'Gage',
+        name: 'Jalanin',
+        short_name: 'Jalanin',
+        description: 'Gage, tol, banjir, MRT — sekali lihat.',
         lang: 'id',
         display: 'standalone',
         start_url: '/',

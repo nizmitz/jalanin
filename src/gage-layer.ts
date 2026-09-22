@@ -1,4 +1,5 @@
 import * as maplibregl from 'maplibre-gl';
+import { escapeHtml } from './html';
 import { GAGE_ROADS } from './roads';
 import type { Verdict } from './gage';
 import type { Theme } from './theme';
@@ -20,15 +21,6 @@ export const CASING_COLORS: Record<Theme, string> = { light: '#ffffff', dark: '#
 export function roadState(v: Verdict, activeNow: boolean): RoadState {
   if (v !== 'avoid') return 'open';
   return activeNow ? 'blocked' : 'blocked-later';
-}
-
-export function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function firstSymbolLayerId(map: maplibregl.Map): string | undefined {

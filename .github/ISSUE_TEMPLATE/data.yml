@@ -1,0 +1,40 @@
+name: Data salah / Wrong data
+description: Laporkan jalan, stasiun, atau aturan yang salah di peta.
+title: 'Data salah: '
+labels: [data]
+body:
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Layer
+      options:
+        - gage
+        - mrt
+        - lrt
+        - krl
+        - transjakarta
+        - lainnya
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Apa yang salah?
+      description: Contoh — jalan ini bukan gage, nama stasiun salah, garis berhenti di tempat yang keliru.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Di mana?
+      description: Koordinat, tautan peta, atau nama jalan.
+  - type: input
+    id: source
+    attributes:
+      label: Sumber (opsional)
+      description: Tautan ke Pergub, Dishub, operator, atau berita yang mendukung.
+  - type: textarea
+    id: context
+    attributes:
+      label: Konteks aplikasi
+      description: Terisi otomatis dari tombol "Lapor data salah".
