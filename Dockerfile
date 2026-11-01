@@ -9,7 +9,7 @@ COPY . .
 RUN npm run build
 
 # nginxinc/nginx-unprivileged:stable-alpine, pinned 2026-09-21
-FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:04a3275f25d766cff8926d2e57b2ff34a783d6b12a702dc98bb82226d2d9a508
+FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03
 COPY deploy/nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY deploy/nginx/site.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
